@@ -16,13 +16,11 @@
 #define SPU_SIZEOF_LONG_INT sizeof(long)
 #define SPU_SIZEOF_LONG_LONG_INT sizeof(long long)
 
-#define LOC_INLINE __inline__
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <limits.h>
 
-#ifndef __WIN32__
+#ifndef ARCH_PC_WIN95
 # include <sys/types.h>
 # include <sys/socket.h>
 # include <sys/param.h>

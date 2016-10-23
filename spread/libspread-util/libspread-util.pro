@@ -2,8 +2,10 @@ TARGET = spread-util
 TEMPLATE = lib
 
 CONFIG -= qt
-unix:CONFIG += static
-win32:CONFIG += shared
+CONFIG += static
+
+win32:DEFINES += ARCH_PC_WIN95 WIN32 DISABLE_FUNCTION_NAME_LOOKUP
+win32:LIBS += -lws2_32
 
 INCLUDEPATH += ./include
 

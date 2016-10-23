@@ -2,8 +2,7 @@ TARGET = stdutil
 TEMPLATE = lib
 
 CONFIG -= qt
-unix:CONFIG += static c11
-win32:CONFIG += shared c11
+CONFIG += static
 
 INCLUDEPATH += ./src
 

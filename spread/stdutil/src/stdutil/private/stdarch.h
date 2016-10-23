@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-#define STDARCH_MAX_BYTE_ALIGNMENT sizeof(max_align_t)
+#define STDARCH_MAX_BYTE_ALIGNMENT sizeof(size_t)
 #define STDARCH_NULL_IS_ZERO 1
 
 typedef int32_t stdarch_int32;
