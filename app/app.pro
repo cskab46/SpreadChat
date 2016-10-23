@@ -25,4 +25,11 @@ win32:CONFIG(release):LIBS += \
 win32:LIBS += -lws2_32
 
 SOURCES += \
-    main.cpp
+    main.cpp \
+    ChatWindow.cpp
+
+FORMS += \
+    ChatWindow.ui
+
+HEADERS += \
+    ChatWindow.h

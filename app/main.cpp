@@ -1,9 +1,9 @@
-#include <cstdio>
-#include <sp.h>
+#include <QApplication>
+#include "ChatWindow.h"
 
-int main() {
-    int major, minor, patch;
-    SP_version(&major, &minor, &patch);
-    printf("Spread version: %d.%d.%d\n", major, minor, patch);
-    return 0;
+int main(int argc, char** argv) {
+    QApplication app(argc, argv);
+    ChatWindow window;
+    window.show();
+    return app.exec();
 }
