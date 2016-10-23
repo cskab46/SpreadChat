@@ -7,6 +7,8 @@ namespace Ui {
 class ChatWindow;
 }
 
+class QLabel;
+
 class ChatWindow : public QMainWindow
 {
     Q_OBJECT
@@ -20,6 +22,7 @@ private slots:
 
 private:
     Ui::ChatWindow* ui;
+    QLabel* statusBarLabel;
 };
 
 #endif // CHATWINDOW_H
