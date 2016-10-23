@@ -26,10 +26,12 @@ win32:LIBS += -lws2_32
 
 SOURCES += \
     main.cpp \
-    ChatWindow.cpp
+    ChatWindow.cpp \
+    spread/SpreadConnection.cpp
 
 FORMS += \
     ChatWindow.ui
 
 HEADERS += \
-    ChatWindow.h
+    ChatWindow.h \
+    spread/SpreadConnection.h
