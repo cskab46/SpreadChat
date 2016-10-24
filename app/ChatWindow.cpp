@@ -1,7 +1,6 @@
 #include "ChatWindow.h"
 #include "ui_ChatWindow.h"
 
-#include <QDebug>
 #include <QMessageBox>
 #include "SpreadConnection.h"
 
@@ -11,7 +10,7 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     , connection(std::move(conn))
 {
     ui->setupUi(this);
-    qDebug() << connection->isConnected();
+    setWindowTitle(QString::fromStdString(connection->getHostname()));
 }
 
 ChatWindow::~ChatWindow()
