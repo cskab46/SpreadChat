@@ -1,7 +1,10 @@
 #include "ChatWindow.h"
 #include "ui_ChatWindow.h"
 
+#include <QMenu>
+#include <QAction>
 #include <QMessageBox>
+#include "JoinDialog.h"
 #include "SpreadConnection.h"
 
 ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
@@ -41,4 +44,19 @@ void ChatWindow::on_actionAbout_triggered()
     about.setIcon(QMessageBox::Information);
     about.setText(staticText.str);
     about.exec();
+}
+
+void ChatWindow::on_actionJoinGroup_triggered()
+{
+    JoinDialog dialog;
+    while (dialog.exec()) {
+        QByteArray groupName = dialog.groupName().toLatin1();
+        int status = connection->joinGroup(groupName.data());
+        if (status != 0) {
+            QMessageBox::critical(this, "Erro", "Nome de grupo inválido", QMessageBox::Ok);
+        }
+        else {
+            break;
+        }
+    }
 }

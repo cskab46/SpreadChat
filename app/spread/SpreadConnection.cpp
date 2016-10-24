@@ -68,3 +68,8 @@ int SpreadConnection::getLastError() const
 {
     return lastError;
 }
+
+int SpreadConnection::joinGroup(const char* group)
+{
+    return SP_join(mailbox, group);
+}

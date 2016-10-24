@@ -17,9 +17,12 @@
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <widget class="QTabWidget" name="tabWidget">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>+</string>
+        <string>Nenhum grupo</string>
        </attribute>
       </widget>
      </widget>
@@ -47,7 +50,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionOpenConnection"/>
+   <addaction name="actionJoinGroup"/>
    <addaction name="actionAbout"/>
   </widget>
   <action name="actionAbout">
@@ -58,12 +61,12 @@
     <string>F1</string>
    </property>
   </action>
-  <action name="actionOpenConnection">
+  <action name="actionJoinGroup">
    <property name="text">
-    <string>Abrir Conexão (F5)</string>
+    <string>Entrar em um Grupo (F2)</string>
    </property>
    <property name="shortcut">
-    <string>F5</string>
+    <string>F2</string>
    </property>
   </action>
  </widget>

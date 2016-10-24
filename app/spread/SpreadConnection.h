@@ -43,7 +43,7 @@ public:
 
     // Group API
     const std::vector<std::string>& getGroups() const;
-    void joinGroup(const char* group);
+    int joinGroup(const char* group);
     void leaveGroup(const char* group);
 
     // Message API

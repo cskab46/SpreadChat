@@ -32,15 +32,18 @@ SOURCES += \
     ChatWindow.cpp \
     spread/SpreadConnection.cpp \
     ChatTabWidget.cpp \
-    ConnectionDialog.cpp
+    ConnectionDialog.cpp \
+    JoinDialog.cpp
 
 FORMS += \
     ChatWindow.ui \
     ChatTabWidget.ui \
-    ConnectionDialog.ui
+    ConnectionDialog.ui \
+    JoinDialog.ui
 
 HEADERS += \
     ChatWindow.h \
     spread/SpreadConnection.h \
     ChatTabWidget.h \
-    ConnectionDialog.h
+    ConnectionDialog.h \
+    JoinDialog.h

@@ -19,6 +19,8 @@ public:
 private slots:
     void on_actionAbout_triggered();
 
+    void on_actionJoinGroup_triggered();
+
 private:
     Ui::ChatWindow* ui;
     SpreadConnPtr connection;
