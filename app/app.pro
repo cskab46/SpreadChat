@@ -4,7 +4,7 @@ TEMPLATE = app
 CONFIG += c++14
 QT += core gui widgets
 
-INCLUDEPATH += ../spread/include
+INCLUDEPATH += ../spread/include ./spread
 
 unix:LIBS += \
     ../spread/libspread/libspread.a \
@@ -28,13 +28,16 @@ SOURCES += \
     main.cpp \
     ChatWindow.cpp \
     spread/SpreadConnection.cpp \
-    ChatTabWidget.cpp
+    ChatTabWidget.cpp \
+    ConnectionDialog.cpp
 
 FORMS += \
     ChatWindow.ui \
-    ChatTabWidget.ui
+    ChatTabWidget.ui \
+    ConnectionDialog.ui
 
 HEADERS += \
     ChatWindow.h \
     spread/SpreadConnection.h \
-    ChatTabWidget.h
+    ChatTabWidget.h \
+    ConnectionDialog.h

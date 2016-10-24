@@ -2,19 +2,18 @@
 #define CHATWINDOW_H
 
 #include <QMainWindow>
+#include "SpreadConnection.h"
 
 namespace Ui {
 class ChatWindow;
 }
-
-class QLabel;
 
 class ChatWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit ChatWindow(QWidget* parent = 0);
+    explicit ChatWindow(SpreadConnPtr connection, QWidget* parent = 0);
     ~ChatWindow();
 
 private slots:
@@ -22,7 +21,7 @@ private slots:
 
 private:
     Ui::ChatWindow* ui;
-    QLabel* statusBarLabel;
+    SpreadConnPtr connection;
 };
 
 #endif // CHATWINDOW_H

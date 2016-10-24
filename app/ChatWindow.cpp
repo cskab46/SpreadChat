@@ -1,15 +1,17 @@
 #include "ChatWindow.h"
 #include "ui_ChatWindow.h"
 
+#include <QDebug>
 #include <QMessageBox>
-#include "spread/SpreadConnection.h"
+#include "SpreadConnection.h"
 
-ChatWindow::ChatWindow(QWidget* parent)
+ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::ChatWindow)
+    , connection(std::move(conn))
 {
     ui->setupUi(this);
-    ui->statusbar->showMessage("Aguardando conexão", 0);
+    qDebug() << connection->isConnected();
 }
 
 ChatWindow::~ChatWindow()

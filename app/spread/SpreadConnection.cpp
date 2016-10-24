@@ -10,3 +10,13 @@ std::string SpreadConnection::getVersion()
     ss << major << "." << minor << "." << patch;
     return ss.str();
 }
+
+SpreadConnection::SpreadConnection(const char* host, int port)
+{
+    connected = true;
+}
+
+bool SpreadConnection::isConnected() const
+{
+    return connected;
+}
