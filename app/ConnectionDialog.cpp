@@ -15,6 +15,7 @@ ConnectionDialog::ConnectionDialog(QWidget* parent)
 #else
     QByteArray username = qgetenv("USER");
 #endif
+    username.replace(" ", "");
     ui->nameField->setText(username);
     ui->nameField->setFocus();
 }

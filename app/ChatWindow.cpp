@@ -4,6 +4,9 @@
 #include <QMenu>
 #include <QAction>
 #include <QMessageBox>
+#include <QComboBox>
+#include <QTextCodec>
+#include <QCompleter>
 #include "JoinDialog.h"
 #include "SpreadConnection.h"
 
@@ -14,6 +17,21 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
 {
     ui->setupUi(this);
     setWindowTitle(QString::fromStdString(connection->getHostname()));
+    QToolBar* toolbar = ui->toolBar;
+    QWidget* spacer = new QWidget(this);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    QComboBox* encodingBox = new QComboBox(this);
+    QList<QByteArray> encodings = QTextCodec::availableCodecs();
+    qSort(encodings.begin(), encodings.end(), [](const QByteArray& a, const QByteArray& b) {
+        return a.toLower() < b.toLower();
+    });
+    for(QByteArray enc : encodings) {
+        encodingBox->addItem(enc);
+    }
+    encodingBox->setCurrentText("UTF-16");
+    encodingBox->setToolTip("Codificação preferida");
+    toolbar->addWidget(spacer);
+    toolbar->addWidget(encodingBox);
 }
 
 ChatWindow::~ChatWindow()
