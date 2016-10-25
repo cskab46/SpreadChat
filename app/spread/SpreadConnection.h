@@ -2,6 +2,7 @@
 #define SPREADCONNECTION_H
 
 #include "SpreadWorker.h"
+#include "SpreadGroup.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -22,9 +23,11 @@ public:
         REJECT_AUTH = 9
     };
 
+    typedef std::vector<std::unique_ptr<SpreadGroup>> SpreadGroupList;
+
 private:
     SpreadWorker worker;
-    std::vector<std::string> groups;
+    SpreadGroupList groups;
     std::string hostname;
     int mailbox;
     int lastError;
@@ -45,9 +48,10 @@ public:
     int getLastError() const;
 
     // Group API
-    const std::vector<std::string>& getGroups() const;
-    int joinGroup(const char* group);
-    void leaveGroup(const char* group);
+    const SpreadGroupList& getGroups() const;
+    const SpreadGroup* joinGroup(const char* group);
+    bool inGroup(const char* name) const;
+    void leaveGroup(const SpreadGroup* group);
 
     // Message API
 };

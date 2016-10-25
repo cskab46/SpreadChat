@@ -1,9 +1,12 @@
 #include "ChatTabWidget.h"
 #include "ui_ChatTabWidget.h"
 
-ChatTabWidget::ChatTabWidget(QWidget* parent)
+#include "SpreadGroup.h"
+
+ChatTabWidget::ChatTabWidget(const SpreadGroup* group, QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::ChatTabWidget)
+    , group(group)
 {
     ui->setupUi(this);
 }
@@ -11,4 +14,9 @@ ChatTabWidget::ChatTabWidget(QWidget* parent)
 ChatTabWidget::~ChatTabWidget()
 {
     delete ui;
+}
+
+const SpreadGroup* ChatTabWidget::getGroup() const
+{
+    return group;
 }

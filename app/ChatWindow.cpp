@@ -2,18 +2,20 @@
 #include "ui_ChatWindow.h"
 
 #include <QMenu>
-#include <QAction>
+#include <QToolBar>
 #include <QMessageBox>
 #include <QComboBox>
 #include <QTextCodec>
 #include <QCompleter>
 #include "JoinDialog.h"
+#include "ChatTabWidget.h"
 #include "SpreadConnection.h"
 
 ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::ChatWindow)
     , connection(std::move(conn))
+    , defaultTabVisible(false)
 {
     ui->setupUi(this);
     QToolBar* toolbar = ui->toolBar;
@@ -34,6 +36,7 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     toolbar->addWidget(spacer);
     toolbar->addWidget(encodingBox);
     setWindowTitle(QString("Chat em %1").arg(QString::fromStdString(connection->getHostname())));
+    createDefaultTab();
 }
 
 ChatWindow::~ChatWindow()
@@ -71,12 +74,61 @@ void ChatWindow::on_actionJoinGroup_triggered()
     JoinDialog dialog;
     while (dialog.exec()) {
         QByteArray groupName = dialog.groupName().toLatin1();
-        int status = connection->joinGroup(groupName.data());
-        if (status != 0) {
-            QMessageBox::critical(this, "Erro", "Nome de grupo inválido", QMessageBox::Ok);
+        if (!connection->inGroup(groupName.data())) {
+            // Entra no grupo novo
+            const SpreadGroup* group = connection->joinGroup(groupName.data());
+            if (group) {
+                addGroupTab(group);
+                break;
+            }
+            else {
+                QMessageBox::critical(this, "Erro", "Nome de grupo inválido", QMessageBox::Ok);
+            }
         }
         else {
+            // Seleciona o grupo existente
+            int index = 0;
+            while (index < ui->tabWidget->count()) {
+                ChatTabWidget* widget = dynamic_cast<ChatTabWidget*>(ui->tabWidget->widget(index));
+                auto name = widget->getGroup()->getName();
+                if (name == groupName.data()) {
+                    break;
+                }
+                index++;
+            }
+            ui->tabWidget->setCurrentIndex(index);
             break;
         }
     }
+}
+
+void ChatWindow::on_tabWidget_tabCloseRequested(int index)
+{
+    ChatTabWidget* widget = dynamic_cast<ChatTabWidget*>(ui->tabWidget->widget(index));
+    const SpreadGroup* group = widget->getGroup();
+    connection->leaveGroup(group);
+    ui->tabWidget->removeTab(index);
+    if (ui->tabWidget->count() == 0) {
+        createDefaultTab();
+    }
+}
+
+void ChatWindow::addGroupTab(const SpreadGroup* group)
+{
+    if (defaultTabVisible) {
+        ui->tabWidget->removeTab(0);
+        ui->tabWidget->setEnabled(true);
+        defaultTabVisible = false;
+    }
+    auto widget = new ChatTabWidget(group, this);
+    ui->tabWidget->addTab(widget, QString::fromStdString(group->getName()));
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
+}
+
+void ChatWindow::createDefaultTab()
+{
+    ui->tabWidget->addTab(new QWidget(this), "Nenhum grupo");
+    ui->tabWidget->setCurrentIndex(0);
+    ui->tabWidget->setEnabled(false);
+    defaultTabVisible = true;
 }

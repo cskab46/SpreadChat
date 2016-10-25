@@ -19,10 +19,15 @@ public:
 private slots:
     void on_actionAbout_triggered();
     void on_actionJoinGroup_triggered();
+    void on_tabWidget_tabCloseRequested(int index);
 
 private:
+    void createDefaultTab();
+    void addGroupTab(const SpreadGroup* group);
+
     Ui::ChatWindow* ui;
     SpreadConnPtr connection;
+    bool defaultTabVisible;
 };
 
 #endif // CHATWINDOW_H

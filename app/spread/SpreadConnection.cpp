@@ -1,8 +1,8 @@
 #include "SpreadConnection.h"
 #include "SpreadWorker.h"
-#include <QThread>
 #include <sp.h>
 #include <sstream>
+#include <algorithm>
 
 std::string SpreadConnection::getVersion()
 {
@@ -35,17 +35,15 @@ bool SpreadConnection::connect(const char* user, const char* host, int port)
     char group[MAX_GROUP_NAME];
     int status = SP_connect(ss.str().c_str(), user, 0, 1, &mailbox, group);
     connected = (status == ACCEPT_SESSION);
-    if (connected) {
-        ss.str("");
-        ss << host << ":" << port;
-        hostname = ss.str();
-        worker.start();
-        return true;
-    }
-    else {
+    if (!connected) {
         lastError = -status;
         return false;
     }
+    ss.str("");
+    ss << host << ":" << port;
+    hostname = ss.str();
+    worker.start();
+    return true;
 }
 
 void SpreadConnection::disconnect()
@@ -74,7 +72,36 @@ int SpreadConnection::getLastError() const
     return lastError;
 }
 
-int SpreadConnection::joinGroup(const char* group)
+const SpreadConnection::SpreadGroupList& SpreadConnection::getGroups() const
 {
-    return SP_join(mailbox, group);
+    return groups;
+}
+
+const SpreadGroup* SpreadConnection::joinGroup(const char* group)
+{
+    int status = SP_join(mailbox, group);
+    if (status != 0) {
+        lastError = status;
+        return nullptr;
+    }
+    groups.push_back(std::make_unique<SpreadGroup>(this, group));
+    return groups.back().get();
+}
+
+bool SpreadConnection::inGroup(const char* name) const
+{
+    auto result = std::find_if(groups.begin(), groups.end(), [&](const auto& val) {
+        return val->getName() == name;
+    });
+    return result != groups.end();
+}
+
+void SpreadConnection::leaveGroup(const SpreadGroup* group)
+{
+    SP_leave(mailbox, group->getName().c_str());
+    auto iter = std::remove_if(groups.begin(), groups.end(), [&](const auto& val) {
+        volatile bool is_equal = val->getName() == group->getName();
+        return val->getName() == group->getName();
+    });
+    groups.erase(iter, groups.end());
 }
