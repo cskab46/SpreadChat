@@ -18,6 +18,7 @@ public:
     ~ChatTabWidget();
 
     const SpreadGroup* getGroup() const;
+    void setFocus();
 
 private:
     Ui::ChatTabWidget* ui;

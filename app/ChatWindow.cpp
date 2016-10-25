@@ -123,6 +123,7 @@ void ChatWindow::addGroupTab(const SpreadGroup* group)
     auto widget = new ChatTabWidget(group, this);
     ui->tabWidget->addTab(widget, QString::fromStdString(group->getName()));
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
+    widget->setFocus();
 }
 
 void ChatWindow::createDefaultTab()
