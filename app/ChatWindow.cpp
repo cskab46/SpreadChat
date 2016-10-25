@@ -20,6 +20,8 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     QWidget* spacer = new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     QComboBox* encodingBox = new QComboBox(this);
+    encodingBox->setMaxVisibleItems(100);
+    encodingBox->setMaximumWidth(120);
     QList<QByteArray> encodings = QTextCodec::availableCodecs();
     qSort(encodings.begin(), encodings.end(), [](const QByteArray& a, const QByteArray& b) {
         return a.toLower() < b.toLower();
