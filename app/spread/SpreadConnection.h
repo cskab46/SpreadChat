@@ -1,5 +1,7 @@
 #ifndef SPREADCONNECTION_H
 #define SPREADCONNECTION_H
+
+#include "SpreadWorker.h"
 #include <string>
 #include <vector>
 #include <memory>
@@ -21,6 +23,7 @@ public:
     };
 
 private:
+    SpreadWorker worker;
     std::vector<std::string> groups;
     std::string hostname;
     int mailbox;

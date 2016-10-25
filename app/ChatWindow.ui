@@ -20,6 +20,9 @@
       <property name="enabled">
        <bool>false</bool>
       </property>
+      <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
         <string>Nenhum grupo</string>

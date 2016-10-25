@@ -16,7 +16,6 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     , connection(std::move(conn))
 {
     ui->setupUi(this);
-    setWindowTitle(QString::fromStdString(connection->getHostname()));
     QToolBar* toolbar = ui->toolBar;
     QWidget* spacer = new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -32,6 +31,7 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     encodingBox->setToolTip("Codificação preferida");
     toolbar->addWidget(spacer);
     toolbar->addWidget(encodingBox);
+    setWindowTitle(QString("Chat em %1").arg(QString::fromStdString(connection->getHostname())));
 }
 
 ChatWindow::~ChatWindow()

@@ -1,4 +1,6 @@
 #include "SpreadConnection.h"
+#include "SpreadWorker.h"
+#include <QThread>
 #include <sp.h>
 #include <sstream>
 
@@ -22,7 +24,7 @@ SpreadConnection::SpreadConnection(const char* user, const char* host, int port)
 
 SpreadConnection::~SpreadConnection()
 {
-    SP_disconnect(mailbox);
+    disconnect();
 }
 
 bool SpreadConnection::connect(const char* user, const char* host, int port)
@@ -37,6 +39,7 @@ bool SpreadConnection::connect(const char* user, const char* host, int port)
         ss.str("");
         ss << host << ":" << port;
         hostname = ss.str();
+        worker.start();
         return true;
     }
     else {
@@ -48,6 +51,8 @@ bool SpreadConnection::connect(const char* user, const char* host, int port)
 void SpreadConnection::disconnect()
 {
     if (connected) {
+        QMetaObject::invokeMethod(&worker, "finish");
+        worker.wait();
         SP_disconnect(mailbox);
         connected = false;
         hostname = {};

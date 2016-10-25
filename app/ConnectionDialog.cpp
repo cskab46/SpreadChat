@@ -10,6 +10,7 @@ ConnectionDialog::ConnectionDialog(QWidget* parent)
     , ui(new Ui::ConnectionDialog)
 {
     ui->setupUi(this);
+    setWindowFlags(Qt::Window);
 #ifdef Q_OS_WIN
     QByteArray username = qgetenv("USERNAME");
 #else
@@ -35,7 +36,7 @@ void ConnectionDialog::on_buttonBox_accepted()
     if (conn->isConnected()) {
         ChatWindow* window = new ChatWindow(std::move(conn));
         window->setAttribute(Qt::WA_DeleteOnClose, true);
-        window->show();
+        window->showNormal();
         close();
     }
     else {
