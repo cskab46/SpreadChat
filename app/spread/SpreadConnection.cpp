@@ -105,7 +105,12 @@ void SpreadConnection::leaveGroup(const SpreadGroup* group)
     groups.erase(iter, groups.end());
 }
 
-int SpreadConnection::sendMessage(std::string group, QByteArray message)
+bool SpreadConnection::sendMessage(std::string group, QByteArray message)
 {
-    SP_multicast(mailbox, SAFE_MESS, group.c_str(), 0, message.size(), message.data());
+    int length = SP_multicast(mailbox, SAFE_MESS, group.c_str(), 0, message.size(), message.data());
+    if (length < 0) {
+        lastError = -length;
+        return false;
+    }
+    return true;
 }

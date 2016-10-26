@@ -54,7 +54,7 @@ public:
     void leaveGroup(const SpreadGroup* group);
 
     // Message API
-    int sendMessage(std::string group, QByteArray message);
+    bool sendMessage(std::string group, QByteArray message);
     SpreadWorker* getWorker();
 };
 
