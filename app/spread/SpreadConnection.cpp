@@ -17,7 +17,7 @@ SpreadConnection::SpreadConnection()
     : connected(false)
 {}
 
-SpreadConnection::SpreadConnection(const char* user, const char* host, int port)
+SpreadConnection::SpreadConnection(std::string user, std::string host, int port)
 {
     connect(user, host, port);
 }
@@ -27,13 +27,13 @@ SpreadConnection::~SpreadConnection()
     disconnect();
 }
 
-bool SpreadConnection::connect(const char* user, const char* host, int port)
+bool SpreadConnection::connect(std::string user, std::string host, int port)
 {
     disconnect();
     std::stringstream ss;
     ss << port << "@" << host;
     char group[MAX_GROUP_NAME];
-    int status = SP_connect(ss.str().c_str(), user, 0, 1, &mailbox, group);
+    int status = SP_connect(ss.str().c_str(), user.c_str(), 0, 1, &mailbox, group);
     connected = (status == ACCEPT_SESSION);
     if (!connected) {
         lastError = -status;
@@ -77,9 +77,9 @@ const SpreadConnection::SpreadGroupList& SpreadConnection::getGroups() const
     return groups;
 }
 
-const SpreadGroup* SpreadConnection::joinGroup(const char* group)
+SpreadGroup* SpreadConnection::joinGroup(std::string group)
 {
-    int status = SP_join(mailbox, group);
+    int status = SP_join(mailbox, group.c_str());
     if (status != 0) {
         lastError = status;
         return nullptr;
@@ -88,7 +88,7 @@ const SpreadGroup* SpreadConnection::joinGroup(const char* group)
     return groups.back().get();
 }
 
-bool SpreadConnection::inGroup(const char* name) const
+bool SpreadConnection::inGroup(std::string name) const
 {
     auto result = std::find_if(groups.begin(), groups.end(), [&](const auto& val) {
         return val->getName() == name;
@@ -100,8 +100,12 @@ void SpreadConnection::leaveGroup(const SpreadGroup* group)
 {
     SP_leave(mailbox, group->getName().c_str());
     auto iter = std::remove_if(groups.begin(), groups.end(), [&](const auto& val) {
-        volatile bool is_equal = val->getName() == group->getName();
         return val->getName() == group->getName();
     });
     groups.erase(iter, groups.end());
+}
+
+int SpreadConnection::sendMessage(std::string group, QByteArray message)
+{
+    SP_multicast(mailbox, SAFE_MESS, group.c_str(), 0, message.size(), message.data());
 }

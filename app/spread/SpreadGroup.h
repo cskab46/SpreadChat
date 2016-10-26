@@ -1,6 +1,7 @@
 #ifndef SPREADGROUP_H
 #define SPREADGROUP_H
 
+#include <QByteArray>
 #include <string>
 #include <memory>
 class SpreadConnection;
@@ -12,7 +13,8 @@ private:
     std::string name;
 
 public:
-    SpreadGroup(SpreadConnection* conn, const char* name);
+    SpreadGroup(SpreadConnection* conn, std::string name);
+    void sendMessage(QByteArray msg);
     SpreadConnection* getConnection() const;
     std::string getName() const;
 };

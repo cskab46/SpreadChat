@@ -28,11 +28,10 @@ ConnectionDialog::~ConnectionDialog()
 
 void ConnectionDialog::on_buttonBox_accepted()
 {
-    QByteArray user = ui->nameField->text().toLatin1();
-    QByteArray host = ui->hostField->text().toLatin1();
+    std::string user = ui->nameField->text().toStdString();
+    std::string host = ui->hostField->text().toStdString();
     const int port = ui->portField->text().toInt(nullptr);
-    SpreadConnPtr conn = std::make_unique<SpreadConnection>();
-    conn->connect(user.data(), host.data(), port);
+    SpreadConnPtr conn = std::make_unique<SpreadConnection>(user, host, port);
     if (conn->isConnected()) {
         ChatWindow* window = new ChatWindow(std::move(conn));
         window->setAttribute(Qt::WA_DeleteOnClose, true);

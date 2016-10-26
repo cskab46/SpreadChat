@@ -1,17 +1,50 @@
 #include "ChatTabWidget.h"
 #include "ui_ChatTabWidget.h"
 
+#include <QEvent>
+#include <QKeyEvent>
+#include <QAbstractButton>
+#include <QTextCodec>
+#include "ChatWindow.h"
 #include "SpreadGroup.h"
 
-ChatTabWidget::ChatTabWidget(const SpreadGroup* group, QWidget* parent)
+class TextEditSubmitFilter : public QObject
+{
+public:
+    explicit TextEditSubmitFilter(QAbstractButton* button, QObject* parent = 0)
+        : QObject(parent)
+        , button(button)
+    {}
+
+    virtual ~TextEditSubmitFilter()
+    {}
+protected:
+    QAbstractButton* button;
+
+    bool eventFilter(QObject* object, QEvent* event)
+    {
+        if (event->type() == QEvent::KeyPress) {
+            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+            if (keyEvent->key() == Qt::Key_Return) {
+                button->click();
+                return true;
+            }
+        }
+        return QObject::eventFilter(object, event);
+    }
+};
+
+ChatTabWidget::ChatTabWidget(SpreadGroup* group, ChatWindow* parent)
     : QWidget(parent)
     , ui(new Ui::ChatTabWidget)
     , group(group)
+    , window(parent)
 {
     ui->setupUi(this);
     ui->splitter->setCollapsible(1, false);
     ui->splitter->setStretchFactor(0, 100);
     ui->splitter->setStretchFactor(1,   1);
+    ui->inputField->installEventFilter(new TextEditSubmitFilter(ui->sendButton, this));
 }
 
 ChatTabWidget::~ChatTabWidget()
@@ -26,5 +59,14 @@ const SpreadGroup* ChatTabWidget::getGroup() const
 
 void ChatTabWidget::setFocus()
 {
-    ui->messagePanel->setFocus();
+    ui->inputField->setFocus();
+}
+
+void ChatTabWidget::on_sendButton_clicked()
+{
+    const QString& text = ui->inputField->toPlainText();
+    QTextCodec* codec = window->getOutputEncoding();
+    QByteArray message = codec->fromUnicode(text);
+    group->sendMessage(message);
+    ui->inputField->clear();
 }

@@ -2,11 +2,14 @@
 #define CHATWINDOW_H
 
 #include <QMainWindow>
+#include <QTextCodec>
 #include "SpreadConnection.h"
 
 namespace Ui {
 class ChatWindow;
 }
+
+class QComboBox;
 
 class ChatWindow : public QMainWindow
 {
@@ -16,6 +19,9 @@ public:
     explicit ChatWindow(SpreadConnPtr connection, QWidget* parent = 0);
     ~ChatWindow();
 
+    QTextCodec* getInputEncoding();
+    QTextCodec* getOutputEncoding();
+
 private slots:
     void on_actionAbout_triggered();
     void on_actionJoinGroup_triggered();
@@ -23,9 +29,11 @@ private slots:
 
 private:
     void createDefaultTab();
-    void addGroupTab(const SpreadGroup* group);
+    void addGroupTab(SpreadGroup* group);
 
     Ui::ChatWindow* ui;
+    QComboBox* inCodec;
+    QComboBox* outCodec;
     SpreadConnPtr connection;
     bool defaultTabVisible;
 };

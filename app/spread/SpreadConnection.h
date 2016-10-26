@@ -37,11 +37,11 @@ public:
     static std::string getVersion();
 
     SpreadConnection();
-    SpreadConnection(const char* user, const char* host, int port);
+    SpreadConnection(std::string user, std::string host, int port);
     ~SpreadConnection();
 
     // General API
-    bool connect(const char* user, const char* host, int port);
+    bool connect(std::string user, std::string host, int port);
     void disconnect();
     bool isConnected() const;
     std::string getHostname() const;
@@ -49,11 +49,13 @@ public:
 
     // Group API
     const SpreadGroupList& getGroups() const;
-    const SpreadGroup* joinGroup(const char* group);
-    bool inGroup(const char* name) const;
+    SpreadGroup* joinGroup(std::string group);
+    bool inGroup(std::string name) const;
     void leaveGroup(const SpreadGroup* group);
 
     // Message API
+    int sendMessage(std::string group, QByteArray message);
+    SpreadWorker* getWorker();
 };
 
 typedef std::unique_ptr<SpreadConnection> SpreadConnPtr;

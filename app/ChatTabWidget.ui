@@ -36,7 +36,7 @@
      <widget class="QWidget" name="verticalLayoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QTextEdit" name="logPanel">
+        <widget class="QTextEdit" name="outputLog">
          <property name="frameShape">
           <enum>QFrame::WinPanel</enum>
          </property>
@@ -60,7 +60,7 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="QPlainTextEdit" name="messagePanel">
+          <widget class="QPlainTextEdit" name="inputField">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -70,13 +70,13 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>40</height>
+             <height>48</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>40</height>
+             <height>48</height>
             </size>
            </property>
            <property name="frameShape">

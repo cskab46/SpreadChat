@@ -11,6 +11,8 @@
 #include "ChatTabWidget.h"
 #include "SpreadConnection.h"
 
+Q_DECLARE_METATYPE(QTextCodec*);
+
 ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::ChatWindow)
@@ -21,20 +23,36 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     QToolBar* toolbar = ui->toolBar;
     QWidget* spacer = new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    QComboBox* encodingBox = new QComboBox(this);
-    encodingBox->setMaxVisibleItems(100);
-    encodingBox->setMaximumWidth(120);
-    QList<QByteArray> encodings = QTextCodec::availableCodecs();
-    qSort(encodings.begin(), encodings.end(), [](const QByteArray& a, const QByteArray& b) {
-        return a.toLower() < b.toLower();
-    });
-    for(QByteArray enc : encodings) {
-        encodingBox->addItem(enc);
+
+    inCodec = new QComboBox(this);
+    inCodec->setMaxVisibleItems(100);
+    inCodec->setMaximumWidth(120);
+
+    outCodec = new QComboBox(this);
+    outCodec->setMaxVisibleItems(100);
+    outCodec->setMaximumWidth(120);
+
+    QList<int> encodings = QTextCodec::availableMibs();
+//    qSort(encodings.begin(), encodings.end(), [](const QByteArray& a, const QByteArray& b) {
+//        return a.toLower() < b.toLower();
+//    });
+
+    for(int mib : encodings) {
+        QTextCodec* codec = QTextCodec::codecForMib(mib);
+        QVariant codecProxy = QVariant::fromValue<QTextCodec*>(codec);
+        inCodec->addItem(codec->name(), codecProxy);
+        outCodec->addItem(codec->name(), codecProxy);
     }
-    encodingBox->setCurrentText("UTF-16");
-    encodingBox->setToolTip("Codificação preferida");
+
+    inCodec->setCurrentText("UTF-16");
+    inCodec->setToolTip("Codificação da entrada");
+    outCodec->setCurrentText("UTF-16");
+    outCodec->setToolTip("Codificação da saída");
+
     toolbar->addWidget(spacer);
-    toolbar->addWidget(encodingBox);
+    toolbar->addWidget(inCodec);
+    toolbar->addWidget(outCodec);
+
     setWindowTitle(QString("Chat em %1").arg(QString::fromStdString(connection->getHostname())));
     createDefaultTab();
 }
@@ -42,6 +60,16 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
 ChatWindow::~ChatWindow()
 {
     delete ui;
+}
+
+QTextCodec* ChatWindow::getInputEncoding()
+{
+    return inCodec->currentData().value<QTextCodec*>();
+}
+
+QTextCodec* ChatWindow::getOutputEncoding()
+{
+    return outCodec->currentData().value<QTextCodec*>();
 }
 
 void ChatWindow::on_actionAbout_triggered()
@@ -73,10 +101,10 @@ void ChatWindow::on_actionJoinGroup_triggered()
 {
     JoinDialog dialog;
     while (dialog.exec()) {
-        QByteArray groupName = dialog.groupName().toLatin1();
+        std::string groupName = dialog.groupName().toStdString();
         if (!connection->inGroup(groupName.data())) {
             // Entra no grupo novo
-            const SpreadGroup* group = connection->joinGroup(groupName.data());
+            SpreadGroup* group = connection->joinGroup(groupName.data());
             if (group) {
                 addGroupTab(group);
                 break;
@@ -113,7 +141,7 @@ void ChatWindow::on_tabWidget_tabCloseRequested(int index)
     }
 }
 
-void ChatWindow::addGroupTab(const SpreadGroup* group)
+void ChatWindow::addGroupTab(SpreadGroup* group)
 {
     if (defaultTabVisible) {
         ui->tabWidget->removeTab(0);

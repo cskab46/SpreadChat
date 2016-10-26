@@ -9,20 +9,26 @@ namespace Ui {
 class ChatTabWidget;
 }
 
+class ChatWindow;
+
 class ChatTabWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ChatTabWidget(const SpreadGroup* group, QWidget* parent = 0);
+    explicit ChatTabWidget(SpreadGroup* group, ChatWindow* parent);
     ~ChatTabWidget();
 
     const SpreadGroup* getGroup() const;
     void setFocus();
 
+private slots:
+    void on_sendButton_clicked();
+
 private:
     Ui::ChatTabWidget* ui;
-    const SpreadGroup* group;
+    SpreadGroup* group;
+    ChatWindow* window;
 };
 
 #endif // CHATTABWIDGET_H
