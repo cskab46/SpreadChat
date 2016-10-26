@@ -13,6 +13,20 @@
 
 Q_DECLARE_METATYPE(QTextCodec*);
 
+static QList<QTextCodec*> getSystemCodecs()
+{
+    QList<int> codecMibs = QTextCodec::availableMibs();
+    QList<QTextCodec*> codecs;
+    codecs.reserve(codecMibs.size());
+    for(int mib : codecMibs) {
+        codecs.push_back(QTextCodec::codecForMib(mib));
+    }
+    qSort(codecs.begin(), codecs.end(), [](const QTextCodec* a, const QTextCodec* b) {
+        return a->name().toLower() < b->name().toLower();
+    });
+    return codecs;
+}
+
 ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::ChatWindow)
@@ -32,13 +46,8 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     outCodec->setMaxVisibleItems(100);
     outCodec->setMaximumWidth(120);
 
-    QList<int> encodings = QTextCodec::availableMibs();
-//    qSort(encodings.begin(), encodings.end(), [](const QByteArray& a, const QByteArray& b) {
-//        return a.toLower() < b.toLower();
-//    });
-
-    for(int mib : encodings) {
-        QTextCodec* codec = QTextCodec::codecForMib(mib);
+    QList<QTextCodec*> codecs = getSystemCodecs();
+    for(QTextCodec* codec : codecs) {
         QVariant codecProxy = QVariant::fromValue<QTextCodec*>(codec);
         inCodec->addItem(codec->name(), codecProxy);
         outCodec->addItem(codec->name(), codecProxy);
