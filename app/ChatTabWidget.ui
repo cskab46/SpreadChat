@@ -27,10 +27,7 @@
        </size>
       </property>
       <property name="frameShape">
-       <enum>QFrame::WinPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Sunken</enum>
+       <enum>QFrame::Box</enum>
       </property>
      </widget>
      <widget class="QWidget" name="verticalLayoutWidget">
@@ -38,10 +35,7 @@
        <item>
         <widget class="QTextEdit" name="outputLog">
          <property name="frameShape">
-          <enum>QFrame::WinPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Sunken</enum>
+          <enum>QFrame::Box</enum>
          </property>
          <property name="tabChangesFocus">
           <bool>true</bool>
@@ -80,10 +74,7 @@
             </size>
            </property>
            <property name="frameShape">
-            <enum>QFrame::WinPanel</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Sunken</enum>
+            <enum>QFrame::Box</enum>
            </property>
            <property name="tabChangesFocus">
             <bool>true</bool>
