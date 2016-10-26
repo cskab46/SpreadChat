@@ -25,7 +25,9 @@ protected:
     {
         if (event->type() == QEvent::KeyPress) {
             QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-            if (keyEvent->key() == Qt::Key_Return) {
+            bool enterPressed = keyEvent->key() == Qt::Key_Return;
+            bool shiftPressed = keyEvent->modifiers() == Qt::ShiftModifier;
+            if (enterPressed && !shiftPressed) {
                 button->click();
                 return true;
             }
@@ -65,8 +67,10 @@ void ChatTabWidget::setFocus()
 void ChatTabWidget::on_sendButton_clicked()
 {
     const QString& text = ui->inputField->toPlainText();
-    QTextCodec* codec = window->getOutputEncoding();
-    QByteArray message = codec->fromUnicode(text);
-    group->sendMessage(message);
-    ui->inputField->clear();
+    if (!text.isEmpty()) {
+        QTextCodec* codec = window->getOutputEncoding();
+        QByteArray message = codec->fromUnicode(text);
+        group->sendMessage(message);
+        ui->inputField->clear();
+    }
 }
