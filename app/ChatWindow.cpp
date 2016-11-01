@@ -39,29 +39,25 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     QWidget* spacer = new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    inCodec = new QComboBox(this);
-    inCodec->setMaxVisibleItems(100);
-    inCodec->setMaximumWidth(120);
+    codecBox = new QComboBox(this);
+    codecBox->setMaxVisibleItems(100);
+    codecBox->setMaximumWidth(120);
 
-    outCodec = new QComboBox(this);
-    outCodec->setMaxVisibleItems(100);
-    outCodec->setMaximumWidth(120);
-
+    QStringList codecNames;
     QList<QTextCodec*> codecs = getSystemCodecs();
-    for(QTextCodec* codec : codecs) {
-        QVariant codecProxy = QVariant::fromValue<QTextCodec*>(codec);
-        inCodec->addItem(codec->name(), codecProxy);
-        outCodec->addItem(codec->name(), codecProxy);
-    }
 
-    inCodec->setCurrentText("UTF-16");
-    inCodec->setToolTip("Codificação da entrada");
-    outCodec->setCurrentText("UTF-16");
-    outCodec->setToolTip("Codificação da saída");
+    for(QTextCodec* codec : codecs) {
+        QByteArray codecName = codec->name();
+        if (!codecNames.contains(codecName)) {
+            QVariant codecProxy = QVariant::fromValue<QTextCodec*>(codec);
+            codecBox->addItem(codecName, codecProxy);
+            codecNames.append(codecName);
+        }
+    }
+    codecBox->setCurrentText("UTF-8");
 
     toolbar->addWidget(spacer);
-    toolbar->addWidget(inCodec);
-    toolbar->addWidget(outCodec);
+    toolbar->addWidget(codecBox);
 
     setWindowTitle(QString("Chat em %1").arg(connection->getHostname()));
     createDefaultTab();
@@ -75,14 +71,9 @@ ChatWindow::~ChatWindow()
     delete ui;
 }
 
-QTextCodec* ChatWindow::getInputEncoding()
+QTextCodec* ChatWindow::getEncoding()
 {
-    return inCodec->currentData().value<QTextCodec*>();
-}
-
-QTextCodec* ChatWindow::getOutputEncoding()
-{
-    return outCodec->currentData().value<QTextCodec*>();
+    return codecBox->currentData().value<QTextCodec*>();
 }
 
 void ChatWindow::on_actionAbout_triggered()

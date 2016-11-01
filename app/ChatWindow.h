@@ -21,8 +21,7 @@ public:
     explicit ChatWindow(SpreadConnPtr connection, QWidget* parent = 0);
     ~ChatWindow();
 
-    QTextCodec* getInputEncoding();
-    QTextCodec* getOutputEncoding();
+    QTextCodec* getEncoding();
 
 private slots:
     void on_actionAbout_triggered();
@@ -36,8 +35,7 @@ private:
     void addGroupTab(SpreadGroup* group);
 
     Ui::ChatWindow* ui;
-    QComboBox* inCodec;
-    QComboBox* outCodec;
+    QComboBox* codecBox;
     SpreadConnPtr connection;
     std::map<QByteArray, ChatTabWidget*> tabs;
     bool defaultTabVisible;

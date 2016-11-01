@@ -63,7 +63,7 @@ const SpreadGroup* ChatTabWidget::getGroup() const
 
 void ChatTabWidget::addMessage(SpreadMessage message)
 {
-    QTextCodec* codec = window->getInputEncoding();
+    QTextCodec* codec = window->getEncoding();
     QString text = codec->toUnicode(message.text);
     QString user = QString(message.user);
     QTextEdit* log = ui->outputLog;
@@ -83,7 +83,7 @@ void ChatTabWidget::on_sendButton_clicked()
 {
     const QString& text = ui->inputField->toPlainText();
     if (!text.isEmpty()) {
-        QTextCodec* codec = window->getOutputEncoding();
+        QTextCodec* codec = window->getEncoding();
         QByteArray message = codec->fromUnicode(text);
         group->sendMessage(message);
         ui->inputField->clear();
