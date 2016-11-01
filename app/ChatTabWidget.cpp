@@ -64,14 +64,14 @@ const SpreadGroup* ChatTabWidget::getGroup() const
 void ChatTabWidget::addMessage(SpreadMessage message)
 {
     QTextCodec* codec = window->getInputEncoding();
-    QString user = codec->toUnicode(message.user);
     QString text = codec->toUnicode(message.text);
+    QString user = QString(message.user);
     QTextEdit* log = ui->outputLog;
     log->setTextColor(Qt::darkCyan);
     log->append(user + ":");
     log->setTextColor(Qt::black);
     log->append(text);
-    log->append("\n");
+    log->append("");
 }
 
 void ChatTabWidget::setFocus()

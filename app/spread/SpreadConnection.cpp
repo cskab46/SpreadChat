@@ -40,6 +40,7 @@ bool SpreadConnection::connect(QByteArray user, QByteArray host, int port)
         return false;
     }
     hostname = QString("%1:%2").arg(host.data()).arg(port);
+    worker.mailbox = mailbox;
     worker.start();
     return true;
 }
@@ -49,6 +50,7 @@ void SpreadConnection::disconnect()
     if (connected) {
         worker.finish();
         worker.wait();
+        worker.mailbox = -1;
         SP_disconnect(mailbox);
         connected = false;
         hostname = "";

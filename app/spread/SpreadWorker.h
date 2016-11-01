@@ -18,6 +18,8 @@ public:
     virtual void run() override;
     Q_INVOKABLE void finish();
 
+    int mailbox;
+
 signals:
     void userJoined(QByteArray group, QByteArray name);
     void userLeft(QByteArray group, QByteArray name);

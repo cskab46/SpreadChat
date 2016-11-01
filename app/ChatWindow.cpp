@@ -12,6 +12,7 @@
 #include "SpreadConnection.h"
 
 Q_DECLARE_METATYPE(QTextCodec*);
+Q_DECLARE_METATYPE(SpreadMessage);
 
 static QList<QTextCodec*> getSystemCodecs()
 {
@@ -65,7 +66,8 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     setWindowTitle(QString("Chat em %1").arg(connection->getHostname()));
     createDefaultTab();
 
-    connect(connection->getWorker(), SIGNAL(messageReceived(SpreadMessage)), this, SLOT(receiveMessage(SpreadMessage)));
+    connect(connection->getWorker(), &SpreadWorker::messageReceived,
+            this, &ChatWindow::receiveMessage, Qt::QueuedConnection);
 }
 
 ChatWindow::~ChatWindow()
@@ -151,7 +153,9 @@ void ChatWindow::on_tabWidget_tabCloseRequested(int index)
 void ChatWindow::receiveMessage(SpreadMessage message)
 {
     auto tab = tabs.find(message.group);
-    tab->second->addMessage(message);
+    if (tab != tabs.end()) {
+        tab->second->addMessage(message);
+    }
 }
 
 void ChatWindow::addGroupTab(SpreadGroup* group)
