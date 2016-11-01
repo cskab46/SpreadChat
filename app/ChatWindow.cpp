@@ -54,7 +54,7 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
             codecNames.append(codecName);
         }
     }
-    codecBox->setCurrentText("UTF-8");
+    codecBox->setCurrentText("UTF-16");
 
     toolbar->addWidget(spacer);
     toolbar->addWidget(codecBox);
