@@ -4,6 +4,7 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QAbstractButton>
+#include <QRegularExpression>
 #include <QTextCodec>
 #include <QTextEdit>
 
@@ -65,10 +66,12 @@ void ChatTabWidget::addMessage(SpreadMessage message)
 {
     QTextCodec* codec = window->getEncoding();
     QString text = codec->toUnicode(message.text);
-    QString user = QString(message.user);
+    QString user = QString(message.user).section("#", 1, 1);
     QTextEdit* log = ui->outputLog;
+    log->setFontWeight(QFont::Bold);
     log->setTextColor(Qt::darkCyan);
     log->append(user + ":");
+    log->setFontWeight(QFont::Normal);
     log->setTextColor(Qt::black);
     log->append(text);
     log->append("");
