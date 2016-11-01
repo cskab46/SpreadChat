@@ -62,8 +62,10 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     toolbar->addWidget(inCodec);
     toolbar->addWidget(outCodec);
 
-    setWindowTitle(QString("Chat em %1").arg(QString::fromStdString(connection->getHostname())));
+    setWindowTitle(QString("Chat em %1").arg(connection->getHostname()));
     createDefaultTab();
+
+    connect(connection->getWorker(), SIGNAL(messageReceived(SpreadMessage)), this, SLOT(receiveMessage(SpreadMessage)));
 }
 
 ChatWindow::~ChatWindow()
@@ -83,26 +85,20 @@ QTextCodec* ChatWindow::getOutputEncoding()
 
 void ChatWindow::on_actionAbout_triggered()
 {
-    struct StaticConstructor {
-        QString str;
-        StaticConstructor(QString start, std::string version)
-            : str(start + QString::fromStdString(version))
-        {}
-    };
-
-    const static StaticConstructor staticText {
+    const static QString versionString = QString("%1 %2").arg(
         "Este produto utiliza software desenvolvido pela Spread "
         "Concepts LLC para uso junto ao Spread toolkit. Para mais informações sobre o "
         "Spread, visite <a href='http://www.spread.org/'>http://www.spread.org/</a><br>"
         "<hr><br>"
-        "Versão do Spread: ", SpreadConnection::getVersion()
-    };
+        "Versão do Spread: "
+    )
+    .arg(SpreadConnection::getVersion());
 
     QMessageBox about(this);
     about.setWindowTitle("Sobre");
     about.setTextFormat(Qt::RichText);
     about.setIcon(QMessageBox::Information);
-    about.setText(staticText.str);
+    about.setText(versionString);
     about.exec();
 }
 
@@ -143,11 +139,19 @@ void ChatWindow::on_tabWidget_tabCloseRequested(int index)
 {
     ChatTabWidget* widget = dynamic_cast<ChatTabWidget*>(ui->tabWidget->widget(index));
     const SpreadGroup* group = widget->getGroup();
+    auto tab = tabs.find(group->getName());
+    tabs.erase(tab);
     connection->leaveGroup(group);
     ui->tabWidget->removeTab(index);
     if (ui->tabWidget->count() == 0) {
         createDefaultTab();
     }
+}
+
+void ChatWindow::receiveMessage(SpreadMessage message)
+{
+    auto tab = tabs.find(message.group);
+    tab->second->addMessage(message);
 }
 
 void ChatWindow::addGroupTab(SpreadGroup* group)
@@ -158,8 +162,9 @@ void ChatWindow::addGroupTab(SpreadGroup* group)
         defaultTabVisible = false;
     }
     auto widget = new ChatTabWidget(group, this);
-    ui->tabWidget->addTab(widget, QString::fromStdString(group->getName()));
+    ui->tabWidget->addTab(widget, group->getName());
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
+    tabs.insert({group->getName(), widget});
     widget->setFocus();
 }
 

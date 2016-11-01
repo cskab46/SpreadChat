@@ -41,8 +41,8 @@ void ConnectionDialog::on_buttonBox_accepted()
 {
     setAllEnabled(false);
     setCursor(Qt::WaitCursor);
-    std::string user = ui->nameField->text().toStdString();
-    std::string host = ui->hostField->text().toStdString();
+    QByteArray user = ui->nameField->text().toLatin1();
+    QByteArray host = ui->hostField->text().toLatin1();
     int port = ui->portField->text().toInt(nullptr);
     QtConcurrent::run([=]() {
         SpreadConnPtr connection = std::make_unique<SpreadConnection>(user, host, port);

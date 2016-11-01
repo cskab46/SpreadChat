@@ -3,7 +3,7 @@
 
 #include "SpreadWorker.h"
 #include "SpreadGroup.h"
-#include <string>
+#include <QString>
 #include <vector>
 #include <memory>
 #include <utility>
@@ -28,34 +28,34 @@ public:
 private:
     SpreadWorker worker;
     SpreadGroupList groups;
-    std::string hostname;
+    QString hostname;
     int mailbox;
     int lastError;
     bool connected;
 
 public:
-    static std::string getVersion();
+    static QString getVersion();
 
     SpreadConnection();
-    SpreadConnection(std::string user, std::string host, int port);
+    SpreadConnection(QByteArray user, QByteArray host, int port);
     ~SpreadConnection();
 
     // General API
-    bool connect(std::string user, std::string host, int port);
+    bool connect(QByteArray user, QByteArray host, int port);
     void disconnect();
     bool isConnected() const;
-    std::string getHostname() const;
+    QString getHostname() const;
     int getLastError() const;
 
     // Group API
     const SpreadGroupList& getGroups() const;
-    SpreadGroup* joinGroup(std::string group);
-    bool inGroup(std::string name) const;
+    SpreadGroup* joinGroup(QByteArray group);
+    bool inGroup(QByteArray name) const;
     void leaveGroup(const SpreadGroup* group);
 
     // Message API
-    bool sendMessage(std::string group, QByteArray message);
-    SpreadWorker* getWorker();
+    bool sendMessage(QByteArray group, QByteArray message);
+    const SpreadWorker* getWorker();
 };
 
 typedef std::unique_ptr<SpreadConnection> SpreadConnPtr;

@@ -2,6 +2,7 @@
 #define CHATTABWIDGET_H
 
 #include <QWidget>
+#include "SpreadMessage.h"
 
 class SpreadGroup;
 
@@ -20,6 +21,7 @@ public:
     ~ChatTabWidget();
 
     const SpreadGroup* getGroup() const;
+    void addMessage(SpreadMessage message);
     void setFocus();
 
 private slots:

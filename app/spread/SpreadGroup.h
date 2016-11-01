@@ -10,13 +10,13 @@ class SpreadGroup
 {
 private:
     SpreadConnection* connection;
-    std::string name;
+    QByteArray name;
 
 public:
-    SpreadGroup(SpreadConnection* conn, std::string name);
+    SpreadGroup(SpreadConnection* conn, QByteArray name);
     void sendMessage(QByteArray msg);
     SpreadConnection* getConnection() const;
-    std::string getName() const;
+    QByteArray getName() const;
 };
 
 typedef std::unique_ptr<SpreadGroup> SpreadGroupPtr;

@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QByteArray>
+#include "SpreadMessage.h"
 
 class SpreadWorker : public QThread
 {
@@ -20,7 +21,7 @@ public:
 signals:
     void userJoined(QByteArray group, QByteArray name);
     void userLeft(QByteArray group, QByteArray name);
-    void messageReceived(QByteArray group, QByteArray sender, QByteArray contents);
+    void messageReceived(SpreadMessage message);
 };
 
 #endif // SPREADWORKER_H

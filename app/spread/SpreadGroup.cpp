@@ -1,7 +1,7 @@
 #include "SpreadGroup.h"
 #include "SpreadConnection.h"
 
-SpreadGroup::SpreadGroup(SpreadConnection* conn, std::string name)
+SpreadGroup::SpreadGroup(SpreadConnection* conn, QByteArray name)
     : connection(conn)
     , name(name)
 {}
@@ -16,7 +16,7 @@ SpreadConnection* SpreadGroup::getConnection() const
     return connection;
 }
 
-std::string SpreadGroup::getName() const
+QByteArray SpreadGroup::getName() const
 {
     return name;
 }

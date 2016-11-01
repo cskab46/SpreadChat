@@ -5,6 +5,8 @@
 #include <QKeyEvent>
 #include <QAbstractButton>
 #include <QTextCodec>
+#include <QTextEdit>
+
 #include "ChatWindow.h"
 #include "SpreadGroup.h"
 
@@ -57,6 +59,19 @@ ChatTabWidget::~ChatTabWidget()
 const SpreadGroup* ChatTabWidget::getGroup() const
 {
     return group;
+}
+
+void ChatTabWidget::addMessage(SpreadMessage message)
+{
+    QTextCodec* codec = window->getInputEncoding();
+    QString user = codec->toUnicode(message.user);
+    QString text = codec->toUnicode(message.text);
+    QTextEdit* log = ui->outputLog;
+    log->setTextColor(Qt::darkCyan);
+    log->append(user + ":");
+    log->setTextColor(Qt::black);
+    log->append(text);
+    log->append("\n");
 }
 
 void ChatTabWidget::setFocus()

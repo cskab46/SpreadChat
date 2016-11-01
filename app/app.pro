@@ -35,7 +35,8 @@ SOURCES += \
     ConnectionDialog.cpp \
     JoinDialog.cpp \
     spread/SpreadWorker.cpp \
-    spread/SpreadGroup.cpp
+    spread/SpreadGroup.cpp \
+    spread/SpreadMessage.cpp
 
 FORMS += \
     ChatWindow.ui \
@@ -50,4 +51,5 @@ HEADERS += \
     ConnectionDialog.h \
     JoinDialog.h \
     spread/SpreadWorker.h \
-    spread/SpreadGroup.h
+    spread/SpreadGroup.h \
+    spread/SpreadMessage.h
