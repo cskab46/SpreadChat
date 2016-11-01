@@ -23,7 +23,7 @@ public:
         REJECT_AUTH = 9
     };
 
-    typedef std::vector<std::unique_ptr<SpreadGroup>> SpreadGroupList;
+    typedef std::vector<SpreadGroupPtr> SpreadGroupList;
 
 private:
     SpreadWorker worker;

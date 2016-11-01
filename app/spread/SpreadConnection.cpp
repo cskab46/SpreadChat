@@ -32,8 +32,11 @@ bool SpreadConnection::connect(std::string user, std::string host, int port)
     disconnect();
     std::stringstream ss;
     ss << port << "@" << host;
+    sp_time timeout;
+    timeout.sec = 10;
+    timeout.usec = 0;
     char group[MAX_GROUP_NAME];
-    int status = SP_connect(ss.str().c_str(), user.c_str(), 0, 1, &mailbox, group);
+    int status = SP_connect_timeout(ss.str().c_str(), user.c_str(), 0, 1, &mailbox, group, timeout);
     connected = (status == ACCEPT_SESSION);
     if (!connected) {
         lastError = -status;
@@ -49,7 +52,7 @@ bool SpreadConnection::connect(std::string user, std::string host, int port)
 void SpreadConnection::disconnect()
 {
     if (connected) {
-        QMetaObject::invokeMethod(&worker, "finish");
+        worker.finish();
         worker.wait();
         SP_disconnect(mailbox);
         connected = false;
@@ -90,7 +93,7 @@ SpreadGroup* SpreadConnection::joinGroup(std::string group)
 
 bool SpreadConnection::inGroup(std::string name) const
 {
-    auto result = std::find_if(groups.begin(), groups.end(), [&](const auto& val) {
+    auto result = std::find_if(groups.begin(), groups.end(), [&](const SpreadGroupPtr& val) {
         return val->getName() == name;
     });
     return result != groups.end();
@@ -99,7 +102,7 @@ bool SpreadConnection::inGroup(std::string name) const
 void SpreadConnection::leaveGroup(const SpreadGroup* group)
 {
     SP_leave(mailbox, group->getName().c_str());
-    auto iter = std::remove_if(groups.begin(), groups.end(), [&](const auto& val) {
+    auto iter = std::remove_if(groups.begin(), groups.end(), [&](const SpreadGroupPtr& val) {
         return val->getName() == group->getName();
     });
     groups.erase(iter, groups.end());

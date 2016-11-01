@@ -2,6 +2,7 @@
 #include "ui_ConnectionDialog.h"
 
 #include <QMessageBox>
+#include <QtConcurrent/QtConcurrent>
 #include "SpreadConnection.h"
 #include "ChatWindow.h"
 
@@ -26,20 +27,46 @@ ConnectionDialog::~ConnectionDialog()
     delete ui;
 }
 
+void ConnectionDialog::setAllEnabled(bool enabled)
+{
+    ui->nameField->setEnabled(enabled);
+    ui->hostField->setEnabled(enabled);
+    ui->portField->setEnabled(enabled);
+    ui->buttonBox->setEnabled(enabled);
+}
+
+static SpreadConnPtr globalStackConnection;
+
 void ConnectionDialog::on_buttonBox_accepted()
 {
+    setAllEnabled(false);
+    setCursor(Qt::WaitCursor);
     std::string user = ui->nameField->text().toStdString();
     std::string host = ui->hostField->text().toStdString();
-    const int port = ui->portField->text().toInt(nullptr);
-    SpreadConnPtr conn = std::make_unique<SpreadConnection>(user, host, port);
-    if (conn->isConnected()) {
-        ChatWindow* window = new ChatWindow(std::move(conn));
+    int port = ui->portField->text().toInt(nullptr);
+    QtConcurrent::run([=]() {
+        SpreadConnPtr connection = std::make_unique<SpreadConnection>(user, host, port);
+        globalStackConnection = std::move(connection);
+        QMetaObject::invokeMethod(this, "onConnect", Qt::QueuedConnection);
+    });
+}
+
+void ConnectionDialog::on_buttonBox_rejected()
+{
+    close();
+}
+
+void ConnectionDialog::onConnect()
+{
+    SpreadConnPtr connection = std::move(globalStackConnection);
+    if (connection->isConnected()) {
+        ChatWindow* window = new ChatWindow(std::move(connection));
         window->setAttribute(Qt::WA_DeleteOnClose, true);
         window->showNormal();
         close();
     }
     else {
-        int error = conn->getLastError();
+        int error = connection->getLastError();
         QString msg;
         switch (error) {
             case SpreadConnection::ILLEGAL_SPREAD:
@@ -62,10 +89,7 @@ void ConnectionDialog::on_buttonBox_accepted()
                 break;
         }
         QMessageBox::critical(this, "Erro", msg, QMessageBox::Ok);
+        setAllEnabled(true);
+        setCursor(Qt::ArrowCursor);
     }
-}
-
-void ConnectionDialog::on_buttonBox_rejected()
-{
-    close();
 }
