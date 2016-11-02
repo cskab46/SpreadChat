@@ -3,7 +3,10 @@
 
 #include <QThread>
 #include <QByteArray>
+#include <QMutex>
 #include "SpreadMessage.h"
+
+class SpreadConnection;
 
 class SpreadWorker : public QThread
 {
@@ -12,19 +15,23 @@ class SpreadWorker : public QThread
     volatile bool running;
 
 public:
-    explicit SpreadWorker(QObject* parent = 0);
+    explicit SpreadWorker(QMutex& mutex, QObject* parent = 0);
     ~SpreadWorker();
 
     virtual void run() override;
     Q_INVOKABLE void finish();
-
-    int mailbox;
 
 signals:
     void userJoined(QByteArray group, QByteArray name);
     void userLeft(QByteArray group, QByteArray name);
     void messageReceived(SpreadMessage message);
     void fatalError(QString message);
+
+private:
+    int mailbox;
+    QMutex& mutex;
+
+    friend class SpreadConnection;
 };
 
 #endif // SPREADWORKER_H
