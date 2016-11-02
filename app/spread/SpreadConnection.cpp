@@ -1,8 +1,8 @@
 #include "SpreadConnection.h"
 #include "SpreadWorker.h"
 #include <sp.h>
-#include <sstream>
 #include <algorithm>
+#include <QDebug>
 
 QString SpreadConnection::getVersion()
 {
@@ -49,7 +49,13 @@ void SpreadConnection::disconnect()
 {
     if (connected) {
         worker.finish();
-        worker.wait();
+        worker.wait(500);
+        // Acaba com o trabalhador se ele não responder devido ao bug de design do spread receber mensagens do próprio cliente sincronamente na saída (entrando em deadlock)
+        if (worker.isRunning()) {
+            qDebug() << "INFO: WorkerThread parou de responder e será terminada...";
+            worker.terminate();
+            qDebug() << "INFO: WorkerThread finalizada com sucesso!";
+        }
         worker.mailbox = -1;
         SP_disconnect(mailbox);
         connected = false;
