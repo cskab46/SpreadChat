@@ -35,6 +35,7 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     , defaultTabVisible(false)
 {
     ui->setupUi(this);
+
     QToolBar* toolbar = ui->toolBar;
     QWidget* spacer = new QWidget(this);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
