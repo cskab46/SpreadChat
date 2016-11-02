@@ -58,7 +58,7 @@ void SpreadWorker::run()
                     emit fatalError("Erro ocorrido no recebimento da mensagem, servidor fora do ar?");
                     return;
                 }
-                QByteArray firstGroup = groups.mid(0, MAX_GROUP_NAME);
+                QByteArray firstGroup = groups.mid(0, qMin(qstrlen(groups.data()), unsigned(MAX_GROUP_NAME)));
                 emit messageReceived(SpreadMessage(firstGroup, sender, message));
                 bytesLeft = SP_poll(mailbox);
             }
