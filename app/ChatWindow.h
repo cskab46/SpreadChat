@@ -29,6 +29,7 @@ private slots:
     void on_tabWidget_tabCloseRequested(int index);
 
     void receiveMessage(SpreadMessage message);
+    void quitWithError(QString err);
 
 private:
     void createDefaultTab();

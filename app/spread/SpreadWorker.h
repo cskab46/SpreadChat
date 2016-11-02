@@ -24,6 +24,7 @@ signals:
     void userJoined(QByteArray group, QByteArray name);
     void userLeft(QByteArray group, QByteArray name);
     void messageReceived(SpreadMessage message);
+    void fatalError(QString message);
 };
 
 #endif // SPREADWORKER_H

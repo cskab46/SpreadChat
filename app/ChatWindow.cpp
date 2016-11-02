@@ -64,6 +64,8 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
 
     connect(connection->getWorker(), &SpreadWorker::messageReceived,
             this, &ChatWindow::receiveMessage, Qt::QueuedConnection);
+    connect(connection->getWorker(), &SpreadWorker::fatalError,
+            this, &ChatWindow::quitWithError, Qt::QueuedConnection);
 }
 
 ChatWindow::~ChatWindow()
@@ -147,6 +149,13 @@ void ChatWindow::receiveMessage(SpreadMessage message)
     if (tab != tabs.end()) {
         tab->second->addMessage(message);
     }
+}
+
+void ChatWindow::quitWithError(QString err)
+{
+    hide();
+    QMessageBox::critical(this, "Erro no worker", err, QMessageBox::Abort);
+    qApp->exit(1);
 }
 
 void ChatWindow::addGroupTab(SpreadGroup* group)
