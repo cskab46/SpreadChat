@@ -17,8 +17,11 @@ ConnectionDialog::ConnectionDialog(QWidget* parent)
 #else
     QByteArray username = qgetenv("USER");
 #endif
-    username.replace(" ", "");
-    ui->nameField->setText(username);
+    QString nameString = {username};
+    nameString[0] = nameString[0].toUpper();
+    nameString = nameString.section(" ", 0, 0);
+    nameString.truncate(10);
+    ui->nameField->setText(nameString.toLatin1());
     ui->nameField->setFocus();
 }
 

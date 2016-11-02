@@ -65,8 +65,8 @@
      </item>
      <item row="0" column="1">
       <widget class="QLineEdit" name="nameField">
-       <property name="text">
-        <string>%username%</string>
+       <property name="maxLength">
+        <number>10</number>
        </property>
       </widget>
      </item>
