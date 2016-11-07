@@ -3,11 +3,10 @@
 #include <QMutexLocker>
 #include <sp.h>
 
-SpreadWorker::SpreadWorker(QMutex& mutex, QObject* parent)
+SpreadWorker::SpreadWorker(QObject* parent)
     : QThread(parent)
     , running(false)
     , mailbox(-1)
-    , mutex(mutex)
 {}
 
 SpreadWorker::~SpreadWorker()
@@ -18,7 +17,6 @@ void SpreadWorker::run()
     running = true;
     while (running) {
         if (mailbox >= 0) {
-            QMutexLocker locker(&mutex);
             int bytesLeft = SP_poll(mailbox);
             while (bytesLeft > 0) {
                 // Variáveis pré-alocadas

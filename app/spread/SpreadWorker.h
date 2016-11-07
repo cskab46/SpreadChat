@@ -15,7 +15,7 @@ class SpreadWorker : public QThread
     volatile bool running;
 
 public:
-    explicit SpreadWorker(QMutex& mutex, QObject* parent = 0);
+    explicit SpreadWorker(QObject* parent = 0);
     ~SpreadWorker();
 
     virtual void run() override;
@@ -29,8 +29,6 @@ signals:
 
 private:
     int mailbox;
-    QMutex& mutex;
-
     friend class SpreadConnection;
 };
 

@@ -3,7 +3,6 @@
 
 #include "SpreadWorker.h"
 #include "SpreadGroup.h"
-#include <QMutex>
 #include <QString>
 #include <vector>
 #include <memory>
@@ -28,7 +27,6 @@ public:
 
 private:
     SpreadWorker worker;
-    QMutex mutex;
     SpreadGroupList groups;
     QString hostname;
     int mailbox;

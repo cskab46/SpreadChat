@@ -4,6 +4,8 @@ TEMPLATE = lib
 CONFIG -= qt
 CONFIG += static
 
+DEFINES += _REENTRANT
+
 win32:DEFINES += WIN32 ARCH_PC_WIN95
 
 INCLUDEPATH += ../include ../libspread-util/include ../stdutil/src ../daemon

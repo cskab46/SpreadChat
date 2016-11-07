@@ -1,6 +1,5 @@
 #include "SpreadConnection.h"
 #include "SpreadWorker.h"
-#include <QMutexLocker>
 #include <QDebug>
 #include <algorithm>
 #include <sp.h>
@@ -13,12 +12,10 @@ QString SpreadConnection::getVersion()
 }
 
 SpreadConnection::SpreadConnection()
-    : worker(mutex)
-    , connected(false)
+    : connected(false)
 {}
 
 SpreadConnection::SpreadConnection(QByteArray user, QByteArray host, int port)
-    : worker(mutex)
 {
     connect(user, host, port);
 }
@@ -36,7 +33,6 @@ bool SpreadConnection::connect(QByteArray user, QByteArray host, int port)
     timeout.sec = 10;
     timeout.usec = 0;
     char group[MAX_GROUP_NAME];
-    QMutexLocker locker(&mutex);
     int status = SP_connect_timeout(address.data(), user.data(), 0, 1, &mailbox, group, timeout);
     connected = (status == ACCEPT_SESSION);
     if (!connected) {
@@ -89,9 +85,7 @@ const SpreadConnection::SpreadGroupList& SpreadConnection::getGroups() const
 
 SpreadGroup* SpreadConnection::joinGroup(QByteArray group)
 {
-    mutex.lock();
     int status = SP_join(mailbox, group.data());
-    mutex.unlock();
     if (status != 0) {
         lastError = status;
         return nullptr;
@@ -110,9 +104,7 @@ bool SpreadConnection::inGroup(QByteArray name) const
 
 void SpreadConnection::leaveGroup(const SpreadGroup* group)
 {
-    mutex.lock();
     SP_leave(mailbox, group->getName().data());
-    mutex.unlock();
     auto iter = std::remove_if(groups.begin(), groups.end(), [&](const SpreadGroupPtr& val) {
         return val->getName() == group->getName();
     });
@@ -121,9 +113,7 @@ void SpreadConnection::leaveGroup(const SpreadGroup* group)
 
 bool SpreadConnection::sendMessage(QByteArray group, QByteArray message)
 {
-    mutex.lock();
     int length = SP_multicast(mailbox, SAFE_MESS, group.data(), 0, message.size(), message.data());
-    mutex.unlock();
     if (length < 0) {
         lastError = -length;
         return false;

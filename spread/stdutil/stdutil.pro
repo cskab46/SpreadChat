@@ -4,6 +4,8 @@ TEMPLATE = lib
 CONFIG -= qt
 CONFIG += static
 
+DEFINES += _REENTRANT
+
 INCLUDEPATH += ./src
 
 SOURCES += \
