@@ -39,21 +39,17 @@ void SpreadWorker::run()
                 int maxGroups = -numGroups;
                 groups.resize(maxGroups * MAX_GROUP_NAME);
                 message.resize(msgSize);
-                // Trata mensagem de participação de grupo
+                // Trata mensagem de entrada ou saída do grupo
                 if (Is_membership_mess(svcType)) {
-                    status = SP_receive (
-                        mailbox, &svcType, sender.data(), maxGroups, &numGroups,
-                        reinterpret_cast<char(*)[32]>(groups.data()), &msgType, &mismatch, msgSize, message.data()
-                    );
+                    // Outro membro entrou ou saiu de algum grupo
+                    if (Is_reg_memb_mess(svcType)) {
+                        status = SP_receive (
+                            mailbox, &svcType, sender.data(), maxGroups, &numGroups,
+                            reinterpret_cast<char(*)[32]>(groups.data()), &msgType, &mismatch, msgSize, message.data()
+                        );
+                    }
                 }
-                // Trata mensagem de saída de grupo
-                else if (Is_self_leave(svcType)) {
-                    status = SP_receive (
-                        mailbox, &svcType, sender.data(), maxGroups, &numGroups,
-                        reinterpret_cast<char(*)[32]>(groups.data()), &msgType, &mismatch, msgSize, message.data()
-                    );
-                }
-                // Trata mensagem comum
+                // Trata mensagem de dados comum
                 else if (Is_regular_mess(svcType)) {
                     // Grava a mensagem no cliente
                     status = SP_receive (
@@ -70,6 +66,7 @@ void SpreadWorker::run()
                 }
                 else {
                     emit fatalError("Não foi possível tratar o tipo de mensagem: (int: 0x" + QString::number(svcType, 16) + ")");
+                    break;
                 }
                 bytesLeft = SP_poll(mailbox);
             }

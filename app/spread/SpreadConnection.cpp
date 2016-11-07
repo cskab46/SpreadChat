@@ -37,7 +37,7 @@ bool SpreadConnection::connect(QByteArray user, QByteArray host, int port)
     timeout.usec = 0;
     char group[MAX_GROUP_NAME];
     QMutexLocker locker(&mutex);
-    int status = SP_connect_timeout(address.data(), user.data(), 0, 0, &mailbox, group, timeout);
+    int status = SP_connect_timeout(address.data(), user.data(), 0, 1, &mailbox, group, timeout);
     connected = (status == ACCEPT_SESSION);
     if (!connected) {
         lastError = -status;
