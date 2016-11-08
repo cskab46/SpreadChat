@@ -64,26 +64,30 @@ QByteArray ChatTabWidget::getGroupName() const
 
 void ChatTabWidget::addMessage(SpreadMessage message)
 {
-    QTextCodec* codec = window->getEncoding();
-    QString text = codec->toUnicode(message.text);
-    QString user = QString(message.user).section("#", 1, 1);
-    QTextEdit* log = ui->outputLog;
-    log->setFontWeight(QFont::Bold);
-    log->setTextColor(Qt::darkCyan);
-    log->append(user + ":");
-    log->setFontWeight(QFont::Normal);
-    log->setTextColor(Qt::black);
-    log->append(text);
-    log->append("");
+    addMessageImpl(message);
+    messageLog.push_back(message);
 }
 
-void ChatTabWidget::addNotification(QString text)
+void ChatTabWidget::addNotification(QByteArray user, QByteArray text)
+{
+    addNotificationImpl(user, text);
+    messageLog.emplace_back("", "", text);
+}
+
+void ChatTabWidget::refreshMessages()
 {
     QTextEdit* log = ui->outputLog;
-    log->setFontWeight(QFont::Bold);
-    log->setTextColor(Qt::darkGreen);
-    log->append(text);
-    log->append("");
+    log->clear();
+    for (SpreadMessage msg : messageLog) {
+        // Mensagem de usuário
+        if (!msg.group.isEmpty()) {
+            addMessageImpl(msg);
+        }
+        // Notificação do grupo
+        else {
+            addNotificationImpl(msg.user, msg.text);
+        }
+    }
 }
 
 void ChatTabWidget::setFocus()
@@ -100,4 +104,29 @@ void ChatTabWidget::on_sendButton_clicked()
         connection->sendMessage(groupName, message);
         ui->inputField->clear();
     }
+}
+
+void ChatTabWidget::addMessageImpl(SpreadMessage message)
+{
+    QTextCodec* codec = window->getEncoding();
+    QString text = codec->toUnicode(message.text);
+    QString user = QString(message.user).section("#", 1, 1);
+    QTextEdit* log = ui->outputLog;
+    log->setFontWeight(QFont::Bold);
+    log->setTextColor(Qt::darkCyan);
+    log->append(user + ":");
+    log->setFontWeight(QFont::Normal);
+    log->setTextColor(Qt::black);
+    log->append(text);
+    log->append("");
+}
+
+void ChatTabWidget::addNotificationImpl(QByteArray user, QByteArray text)
+{
+    QString notification = QString("%1 %2").arg(QString(user)).arg(QString(text));
+    QTextEdit* log = ui->outputLog;
+    log->setFontWeight(QFont::Bold);
+    log->setTextColor(Qt::darkGreen);
+    log->append(notification);
+    log->append("");
 }

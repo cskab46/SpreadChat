@@ -58,6 +58,8 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     }
     codecBox->setCurrentText("UTF-16");
 
+    connect(codecBox, SIGNAL(currentIndexChanged(int)), this, SLOT(refreshAllTabs()));
+
     toolbar->addWidget(spacer);
     toolbar->addWidget(codecBox);
 
@@ -177,6 +179,13 @@ void ChatWindow::addGroupTab(QByteArray groupName)
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
     tabs.insert({groupName, widget});
     widget->setFocus();
+}
+
+void ChatWindow::refreshAllTabs()
+{
+    for (auto pair : tabs) {
+        pair.second->refreshMessages();
+    }
 }
 
 void ChatWindow::createDefaultTab()

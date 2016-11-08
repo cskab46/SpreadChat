@@ -21,17 +21,22 @@ public:
 
     QByteArray getGroupName() const;
     void addMessage(SpreadMessage message);
-    void addNotification(QString text);
+    void addNotification(QByteArray user, QByteArray text);
+    void refreshMessages();
     void setFocus();
 
 private slots:
     void on_sendButton_clicked();
 
 private:
+    void addMessageImpl(SpreadMessage message);
+    void addNotificationImpl(QByteArray user, QByteArray text);
+
     Ui::ChatTabWidget* ui;
     SpreadConnPtr& connection;
     QByteArray groupName;
     ChatWindow* window;
+    std::vector<SpreadMessage> messageLog;
 };
 
 #endif // CHATTABWIDGET_H

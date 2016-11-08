@@ -30,6 +30,7 @@ private slots:
 
     void receiveMessage(SpreadMessage message);
     void quitWithError(QString err);
+    void refreshAllTabs();
 
 private:
     void createDefaultTab();
