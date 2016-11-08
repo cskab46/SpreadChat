@@ -2,13 +2,16 @@
 #define SPREADCONNECTION_H
 
 #include "SpreadWorker.h"
+#include <QByteArrayList>
 #include <QString>
-#include <vector>
+#include <map>
 #include <memory>
 #include <utility>
 
 class SpreadConnection
 {
+    friend class SpreadWoker;
+
 public:
     enum {
         ILLEGAL_SPREAD = 1,
@@ -22,11 +25,13 @@ public:
         REJECT_AUTH = 9
     };
 
-    typedef std::vector<QByteArray> SpreadGroupList;
+    typedef QByteArrayList SpreadGroupList;
+    typedef std::map<QByteArray, QByteArrayList> SpreadGroupMemberList;
 
 private:
     SpreadWorker worker;
     SpreadGroupList groups;
+    SpreadGroupMemberList groupMembers;
     QString hostname;
     int mailbox;
     int lastError;

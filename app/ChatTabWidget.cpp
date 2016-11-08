@@ -4,7 +4,7 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QAbstractButton>
-#include <QRegularExpression>
+#include <QShortcut>
 #include <QTextCodec>
 #include <QTextEdit>
 

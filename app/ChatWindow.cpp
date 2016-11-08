@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include <QComboBox>
 #include <QTextCodec>
-#include <QCompleter>
+#include <QShortcut>
 #include <QDebug>
 #include "JoinDialog.h"
 #include "ChatTabWidget.h"
@@ -44,6 +44,7 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     codecBox = new QComboBox(this);
     codecBox->setMaxVisibleItems(100);
     codecBox->setMaximumWidth(120);
+    connect(codecBox, SIGNAL(currentIndexChanged(int)), this, SLOT(refreshAllTabs()));
 
     QStringList codecNames;
     QList<QTextCodec*> codecs = getSystemCodecs();
@@ -58,7 +59,11 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
     }
     codecBox->setCurrentText("UTF-16");
 
-    connect(codecBox, SIGNAL(currentIndexChanged(int)), this, SLOT(refreshAllTabs()));
+    QShortcut* closeShortcut = new QShortcut(QKeySequence::Close, this);
+    connect(closeShortcut, SIGNAL(activated()), this, SLOT(closeCurrentTab()));
+
+    QShortcut* newTabShortcut = new QShortcut(QKeySequence::AddTab, this);
+    connect(newTabShortcut, SIGNAL(activated()), this, SLOT(on_actionJoinGroup_triggered()));
 
     toolbar->addWidget(spacer);
     toolbar->addWidget(codecBox);
@@ -77,6 +82,7 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
 
     connect(connection->getWorker(), &SpreadWorker::fatalError,
             this, &ChatWindow::quitWithError, Qt::QueuedConnection);
+
 }
 
 ChatWindow::~ChatWindow()
@@ -128,7 +134,7 @@ void ChatWindow::on_actionJoinGroup_triggered()
             // Seleciona o grupo existente
             int index = 0;
             while (index < ui->tabWidget->count()) {
-                ChatTabWidget* widget = dynamic_cast<ChatTabWidget*>(ui->tabWidget->widget(index));
+                ChatTabWidget* widget = qobject_cast<ChatTabWidget*>(ui->tabWidget->widget(index));
                 QByteArray name = widget->getGroupName();
                 if (name == groupName.data()) {
                     break;
@@ -143,7 +149,7 @@ void ChatWindow::on_actionJoinGroup_triggered()
 
 void ChatWindow::on_tabWidget_tabCloseRequested(int index)
 {
-    ChatTabWidget* widget = dynamic_cast<ChatTabWidget*>(ui->tabWidget->widget(index));
+    ChatTabWidget* widget = qobject_cast<ChatTabWidget*>(ui->tabWidget->widget(index));
     QByteArray group = widget->getGroupName();
     connection->leaveGroup(group);
     auto tab = tabs.find(group);
@@ -217,6 +223,16 @@ void ChatWindow::refreshAllTabs()
 {
     for (auto pair : tabs) {
         pair.second->refreshMessages();
+    }
+}
+
+void ChatWindow::closeCurrentTab()
+{
+    if (!defaultTabVisible) {
+        on_tabWidget_tabCloseRequested(ui->tabWidget->currentIndex());
+    }
+    else {
+        close();
     }
 }
 

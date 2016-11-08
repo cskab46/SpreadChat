@@ -90,26 +90,20 @@ bool SpreadConnection::joinGroup(QByteArray name)
         lastError = status;
         return false;
     }
-    groups.push_back(name);
+    groups.append(name);
     return true;
 }
 
 bool SpreadConnection::inGroup(QByteArray name) const
 {
-    auto result = std::find_if(groups.begin(), groups.end(), [&](const QByteArray& group) {
-        return name == group;
-    });
-    return result != groups.end();
+    return groups.contains(name);
 }
 
 void SpreadConnection::leaveGroup(QByteArray name)
 {
     if (inGroup(name)) {
         SP_leave(mailbox, name.data());
-        auto iter = std::remove_if(groups.begin(), groups.end(), [&](const QByteArray& group) {
-            return name == group;
-        });
-        groups.erase(iter, groups.end());
+        groups.removeAll(name);
     }
 }
 

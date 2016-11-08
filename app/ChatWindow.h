@@ -33,6 +33,7 @@ private slots:
     void notifyLeave(QByteArray group, QByteArray user);
     void quitWithError(QString err);
     void refreshAllTabs();
+    void closeCurrentTab();
 
 private:
     void createDefaultTab();
