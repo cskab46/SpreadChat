@@ -67,9 +67,15 @@ void SpreadWorker::run()
                         break;
                     }
                     // Separa os nomes dos grupos a cada 32 caracteres (MAX_GROUP_NAME)
-
-                    QByteArray firstGroup = groups.mid(0, qMin(qstrlen(groups.data()), unsigned(MAX_GROUP_NAME)));
-                    emit messageReceived(SpreadMessage(firstGroup, sender, message));
+                    const char* iterator = groups.constData();
+                    while (*iterator) {
+                        // Calcula o tamanho da string (menor valor entre MAX_GROUP_NAME e distância até o primeiro \0)
+                        // E então copia a string para um array contendo um grupo de destino da mensagem
+                        size_t strSize = qMin(strlen(iterator), size_t(MAX_GROUP_NAME));
+                        QByteArray group = {iterator, int(strSize)};
+                        emit messageReceived(SpreadMessage(group, sender, message));
+                        iterator += MAX_GROUP_NAME;
+                    }
                 }
                 else {
                     emit fatalError("Não foi possível tratar o tipo de mensagem: (int: 0x" + QString::number(svcType, 16) + ")");
