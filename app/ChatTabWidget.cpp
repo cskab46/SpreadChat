@@ -125,6 +125,7 @@ void ChatTabWidget::addMessageImpl(SpreadMessage message)
     QString user = QString(message.user).section("#", 1, 1);
     QTextEdit* log = ui->outputLog;
     log->setFontWeight(QFont::Bold);
+    log->setFontItalic(false);
     log->setTextColor(Qt::darkCyan);
     log->append(user + ":");
     log->setFontWeight(QFont::Normal);
@@ -135,8 +136,9 @@ void ChatTabWidget::addMessageImpl(SpreadMessage message)
 
 void ChatTabWidget::addNotificationImpl(QByteArray user, QByteArray text, QColor color)
 {
-    QString notification = QString("%1 %2").arg(QString(user)).arg(QString(text));
+    QString notification = QString("%1 %2").arg(QString(user).section('#', 1, 1)).arg(QString(text));
     QTextEdit* log = ui->outputLog;
+    log->setFontItalic(true);
     log->setTextColor(color);
     log->append(notification);
     log->append("");
