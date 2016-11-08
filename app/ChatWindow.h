@@ -29,12 +29,15 @@ private slots:
     void on_tabWidget_tabCloseRequested(int index);
 
     void receiveMessage(SpreadMessage message);
+    void notifyJoin(QByteArray group, QByteArray user);
+    void notifyLeave(QByteArray group, QByteArray user);
     void quitWithError(QString err);
     void refreshAllTabs();
 
 private:
     void createDefaultTab();
     void addGroupTab(QByteArray groupName);
+    ChatTabWidget* getTab(QByteArray group) const;
 
     Ui::ChatWindow* ui;
     QComboBox* codecBox;

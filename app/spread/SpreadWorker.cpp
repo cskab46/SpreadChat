@@ -4,6 +4,17 @@
 #include <cassert>
 #include <sp.h>
 
+static QByteArray copyUntil(QByteArray bytes, char ch)
+{
+    int lastChar = bytes.indexOf(ch);
+    if (lastChar < 0) {
+        return bytes;
+    }
+    else {
+        return {bytes.data(), lastChar};
+    }
+}
+
 SpreadWorker::SpreadWorker(QObject* parent)
     : QThread(parent)
     , running(false)
@@ -34,6 +45,9 @@ void SpreadWorker::run()
                     mailbox, &svcType, sender.data(), 0, &numGroups,
                     nullptr, &msgType, &mismatch, 0, nullptr
                 );
+                if (status < 0 && status != GROUPS_TOO_SHORT && status != BUFFER_TOO_SHORT) {
+                    emit fatalError("Erro interno: SP_receive() < 0 na primeira tentativa");
+                }
                 // Define os tamanhos máximos a partir da mensagem anterior
                 int msgSize = -mismatch;
                 int maxGroups = -numGroups;
@@ -41,6 +55,7 @@ void SpreadWorker::run()
                 message.resize(msgSize);
                 // Trata mensagem de entrada ou saída do grupo
                 if (Is_membership_mess(svcType)) {
+                    QByteArray user = {MAX_GROUP_NAME, '\0'};
                     membership_info mbInfo;
                     // Algum membro entrou ou saiu de um grupo
                     if (Is_reg_memb_mess(svcType)) {
@@ -48,14 +63,24 @@ void SpreadWorker::run()
                             mailbox, &svcType, sender.data(), maxGroups, &numGroups,
                             reinterpret_cast<char(*)[32]>(groups.data()), &msgType, &mismatch, msgSize, message.data()
                         );
-
-                        QByteArray firstGroup = groups.mid(0, qMin(qstrlen(groups.data()), unsigned(MAX_GROUP_NAME)));
-                        emit messageReceived(SpreadMessage(firstGroup, sender, message));
-                    }
-                    // Evento de transição
-                    else if (Is_transition_mess(svcType)) {
-                        QByteArray firstGroup = groups.mid(0, qMin(qstrlen(groups.data()), unsigned(MAX_GROUP_NAME)));
-                        emit messageReceived(SpreadMessage(firstGroup, sender, message));
+                        if (status < 0) {
+                            emit fatalError("Erro interno: SP_receive() < 0 em Is_membership_mess()");
+                        }
+                        status = SP_get_memb_info(message.data(), svcType, &mbInfo);
+                        if (status < 0) {
+                            emit fatalError("Erro interno: SP_get_memb_info() < 0 em Is_membership_mess()");
+                        }
+                        // Preenche o nome do usuário que entrou ou saiu do grupo
+                        const char* member = mbInfo.changed_member;
+                        qCopy(member, member + MAX_GROUP_NAME, user.begin());
+                        sender = copyUntil(sender, '\0');
+                        user = copyUntil(user, '\0');
+                        if (Is_caused_join_mess(svcType)) {
+                            emit userJoined(sender, user);
+                        }
+                        else {
+                            emit userLeft(sender, user);
+                        }
                     }
                 }
                 // Trata mensagem de dados comum
@@ -66,10 +91,10 @@ void SpreadWorker::run()
                         reinterpret_cast<char(*)[32]>(groups.data()), &msgType, &mismatch, msgSize, message.data()
                     );
                     if (status < 0) {
-                        emit fatalError("Erro ocorrido no recebimento da mensagem, servidor fora do ar?");
+                        emit fatalError("Erro interno: SP_receive < 0 em Is_regular_mess()");
                         break;
                     }
-                    multicast(groups, [this, sender, message](QByteArray group) {
+                    multicast(groups, [this, sender, &message](QByteArray group) {
                         emit messageReceived(SpreadMessage(group, sender, message));
                     });
                 }
@@ -92,7 +117,11 @@ void SpreadWorker::finish()
 
 void SpreadWorker::multicast(QByteArray groups, std::function<void (QByteArray)> func)
 {
-    assert((groups.size() % 32) == 0);
+    // Verifica o tamanho do array de grupos
+    if ((groups.size() % 32) != 0) {
+        emit fatalError("Erro interno: (groups.size() % 32) != 0");
+    }
+
     // Separa os nomes dos grupos a cada 32 caracteres (MAX_GROUP_NAME)
     const char* iterator = groups.constData();
     while (*iterator) {

@@ -65,27 +65,29 @@ QByteArray ChatTabWidget::getGroupName() const
 void ChatTabWidget::addMessage(SpreadMessage message)
 {
     addMessageImpl(message);
-    messageLog.push_back(message);
+    messageLog.push_back({message, Qt::black});
 }
 
-void ChatTabWidget::addNotification(QByteArray user, QByteArray text)
+void ChatTabWidget::addNotification(QByteArray user, QByteArray text, QColor color)
 {
-    addNotificationImpl(user, text);
-    messageLog.emplace_back("", "", text);
+    addNotificationImpl(user, text, color);
+    SpreadMessage message = {"", user, text};
+    messageLog.push_back({message, color});
 }
 
 void ChatTabWidget::refreshMessages()
 {
-    QTextEdit* log = ui->outputLog;
-    log->clear();
-    for (SpreadMessage msg : messageLog) {
+    ui->outputLog->clear();
+    for (auto item : messageLog) {
+        auto msg = std::get<0>(item);
+        auto color = std::get<1>(item);
         // Mensagem de usuário
         if (!msg.group.isEmpty()) {
             addMessageImpl(msg);
         }
         // Notificação do grupo
         else {
-            addNotificationImpl(msg.user, msg.text);
+            addNotificationImpl(msg.user, msg.text, color);
         }
     }
 }
@@ -121,12 +123,11 @@ void ChatTabWidget::addMessageImpl(SpreadMessage message)
     log->append("");
 }
 
-void ChatTabWidget::addNotificationImpl(QByteArray user, QByteArray text)
+void ChatTabWidget::addNotificationImpl(QByteArray user, QByteArray text, QColor color)
 {
     QString notification = QString("%1 %2").arg(QString(user)).arg(QString(text));
     QTextEdit* log = ui->outputLog;
-    log->setFontWeight(QFont::Bold);
-    log->setTextColor(Qt::darkGreen);
+    log->setTextColor(color);
     log->append(notification);
     log->append("");
 }

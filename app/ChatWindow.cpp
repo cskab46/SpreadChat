@@ -68,6 +68,13 @@ ChatWindow::ChatWindow(SpreadConnPtr conn, QWidget* parent)
 
     connect(connection->getWorker(), &SpreadWorker::messageReceived,
             this, &ChatWindow::receiveMessage, Qt::QueuedConnection);
+
+    connect(connection->getWorker(), &SpreadWorker::userJoined,
+            this, &ChatWindow::notifyJoin, Qt::QueuedConnection);
+
+    connect(connection->getWorker(), &SpreadWorker::userLeft,
+            this, &ChatWindow::notifyLeave, Qt::QueuedConnection);
+
     connect(connection->getWorker(), &SpreadWorker::fatalError,
             this, &ChatWindow::quitWithError, Qt::QueuedConnection);
 }
@@ -149,14 +156,28 @@ void ChatWindow::on_tabWidget_tabCloseRequested(int index)
 
 void ChatWindow::receiveMessage(SpreadMessage message)
 {
-    auto tab = tabs.find(message.group);
-    qInfo() << "Tentando receber mensagem no grupo:" << message.group;
-    if (tab != tabs.end()) {
-        tab->second->addMessage(message);
-        qInfo() << "Sucesso!";
+    ChatTabWidget* tab = getTab(message.group);
+    if (tab) {
+        tab->addMessage(message);
     }
     else {
-        qWarning() << "Grupo não existente!";
+        QMessageBox::warning(this, "Aviso", tr("Mensagem encaminhada para grupo inválido: %1").arg(QString(message.group)), QMessageBox::Ok);
+    }
+}
+
+void ChatWindow::notifyJoin(QByteArray group, QByteArray user)
+{
+    ChatTabWidget* tab = getTab(group);
+    if (tab) {
+        tab->addNotification(user, "entrou no grupo", Qt::darkGreen);
+    }
+}
+
+void ChatWindow::notifyLeave(QByteArray group, QByteArray user)
+{
+    ChatTabWidget* tab = getTab(group);
+    if (tab) {
+        tab->addNotification(user, "saiu do grupo", Qt::darkRed);
     }
 }
 
@@ -179,6 +200,17 @@ void ChatWindow::addGroupTab(QByteArray groupName)
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
     tabs.insert({groupName, widget});
     widget->setFocus();
+}
+
+ChatTabWidget* ChatWindow::getTab(QByteArray group) const
+{
+    auto iterPair = tabs.find(group);
+    if (iterPair != tabs.end()) {
+        return iterPair->second;
+    }
+    else {
+        return nullptr;
+    }
 }
 
 void ChatWindow::refreshAllTabs()

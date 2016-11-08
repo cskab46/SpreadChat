@@ -2,6 +2,8 @@
 #define CHATTABWIDGET_H
 
 #include <QWidget>
+#include <QColor>
+#include <tuple>
 #include "SpreadConnection.h"
 #include "SpreadMessage.h"
 
@@ -21,7 +23,7 @@ public:
 
     QByteArray getGroupName() const;
     void addMessage(SpreadMessage message);
-    void addNotification(QByteArray user, QByteArray text);
+    void addNotification(QByteArray user, QByteArray text, QColor color);
     void refreshMessages();
     void setFocus();
 
@@ -30,13 +32,13 @@ private slots:
 
 private:
     void addMessageImpl(SpreadMessage message);
-    void addNotificationImpl(QByteArray user, QByteArray text);
+    void addNotificationImpl(QByteArray user, QByteArray text, QColor color);
 
     Ui::ChatTabWidget* ui;
     SpreadConnPtr& connection;
     QByteArray groupName;
     ChatWindow* window;
-    std::vector<SpreadMessage> messageLog;
+    std::vector<std::tuple<SpreadMessage, QColor>> messageLog;
 };
 
 #endif // CHATTABWIDGET_H
