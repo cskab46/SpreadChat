@@ -1,4 +1,6 @@
 #include "SpreadWorker.h"
+
+#include "SpreadConnection.h"
 #include <QCoreApplication>
 #include <QMutexLocker>
 #include <cassert>
@@ -15,10 +17,10 @@ static QByteArray copyUntil(QByteArray bytes, char ch)
     }
 }
 
-SpreadWorker::SpreadWorker(QObject* parent)
+SpreadWorker::SpreadWorker(WorkerGetters getters, QObject* parent)
     : QThread(parent)
     , running(false)
-    , mailbox(-1)
+    , getters(getters)
 {}
 
 SpreadWorker::~SpreadWorker()
@@ -26,9 +28,10 @@ SpreadWorker::~SpreadWorker()
 
 void SpreadWorker::run()
 {
-    running = true;
-    while (running) {
-        if (mailbox >= 0) {
+    int mailbox = getters.getMailbox();
+    if (mailbox >= 0) {
+        running = true;
+        while (running) {
             int bytesLeft = SP_poll(mailbox);
             while (bytesLeft > 0) {
                 // Variáveis pré-alocadas
@@ -70,6 +73,7 @@ void SpreadWorker::run()
                         if (status < 0) {
                             emit fatalError("Erro interno: SP_get_memb_info() < 0 em Is_membership_mess()");
                         }
+
                         // Preenche o nome do usuário que entrou ou saiu do grupo
                         const char* member = mbInfo.changed_member;
                         qCopy(member, member + MAX_GROUP_NAME, user.begin());
@@ -81,6 +85,13 @@ void SpreadWorker::run()
                         else {
                             emit userLeft(sender, user);
                         }
+
+                        // Atualiza a lista de membros do grupo
+                        QByteArrayList& members = getters.getMemberList(sender);
+                        members.clear();
+                        multicast(groups, [this, &members, sender](QByteArray member) {
+                            members.append(member);
+                        });
                     }
                 }
                 // Trata mensagem de dados comum
@@ -104,9 +115,9 @@ void SpreadWorker::run()
                 }
                 bytesLeft = SP_poll(mailbox);
             }
+            QCoreApplication::processEvents();
+            msleep(100);
         }
-        QCoreApplication::processEvents();
-        msleep(100);
     }
 }
 

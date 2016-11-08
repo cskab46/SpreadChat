@@ -7,6 +7,7 @@
 #include <QShortcut>
 #include <QTextCodec>
 #include <QTextEdit>
+#include <QListWidget>
 
 #include "ChatWindow.h"
 
@@ -73,6 +74,15 @@ void ChatTabWidget::addNotification(QByteArray user, QByteArray text, QColor col
     addNotificationImpl(user, text, color);
     SpreadMessage message = {"", user, text};
     messageLog.push_back({message, color});
+}
+
+void ChatTabWidget::updateMembers(QByteArrayList members)
+{
+    QListWidget* list = ui->userList;
+    list->clear();
+    for (QByteArray memb : members) {
+        list->addItem(QString(memb).section('#', 1, 1));
+    }
 }
 
 void ChatTabWidget::refreshMessages()

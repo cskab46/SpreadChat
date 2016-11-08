@@ -2,6 +2,7 @@
 #define SPREADCONNECTION_H
 
 #include "SpreadWorker.h"
+#include "WorkerGetters.h"
 #include <QByteArrayList>
 #include <QString>
 #include <map>
@@ -10,7 +11,7 @@
 
 class SpreadConnection
 {
-    friend class SpreadWoker;
+    friend class WorkerGetters;
 
 public:
     enum {

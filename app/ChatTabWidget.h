@@ -2,6 +2,7 @@
 #define CHATTABWIDGET_H
 
 #include <QWidget>
+#include <QByteArrayList>
 #include <QColor>
 #include <tuple>
 #include "SpreadConnection.h"
@@ -24,6 +25,7 @@ public:
     QByteArray getGroupName() const;
     void addMessage(SpreadMessage message);
     void addNotification(QByteArray user, QByteArray text, QColor color);
+    void updateMembers(QByteArrayList members);
     void refreshMessages();
     void setFocus();
 

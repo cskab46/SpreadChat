@@ -1,4 +1,5 @@
 #include "SpreadConnection.h"
+
 #include "SpreadWorker.h"
 #include <QDebug>
 #include <algorithm>
@@ -12,10 +13,14 @@ QString SpreadConnection::getVersion()
 }
 
 SpreadConnection::SpreadConnection()
-    : connected(false)
+    : worker(WorkerGetters {this}, nullptr)
+    , mailbox(-1)
+    , connected(false)
 {}
 
 SpreadConnection::SpreadConnection(QByteArray user, QByteArray host, int port)
+    : worker(WorkerGetters {this}, nullptr)
+    , mailbox(-1)
 {
     connect(user, host, port);
 }
@@ -40,7 +45,6 @@ bool SpreadConnection::connect(QByteArray user, QByteArray host, int port)
         return false;
     }
     hostname = QString("%1:%2").arg(host.data()).arg(port);
-    worker.mailbox = mailbox;
     worker.start();
     return true;
 }
@@ -56,8 +60,8 @@ void SpreadConnection::disconnect()
             worker.terminate();
             qDebug() << "INFO: WorkerThread finalizada com sucesso!";
         }
-        worker.mailbox = -1;
         SP_disconnect(mailbox);
+        mailbox = -1;
         connected = false;
         hostname = "";
     }
@@ -91,6 +95,7 @@ bool SpreadConnection::joinGroup(QByteArray name)
         return false;
     }
     groups.append(name);
+    groupMembers.insert({name, {}});
     return true;
 }
 
@@ -104,12 +109,13 @@ void SpreadConnection::leaveGroup(QByteArray name)
     if (inGroup(name)) {
         SP_leave(mailbox, name.data());
         groups.removeAll(name);
+        groupMembers.erase(groupMembers.find(name));
     }
 }
 
 QByteArrayList SpreadConnection::getUsers(QByteArray group) const
 {
-    return {};
+    return groupMembers.find(group)->second;
 }
 
 bool SpreadConnection::sendMessage(QByteArray group, QByteArray message)

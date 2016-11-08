@@ -5,6 +5,8 @@
 #include <QByteArray>
 #include <QMutex>
 #include <functional>
+
+#include "WorkerGetters.h"
 #include "SpreadMessage.h"
 
 class SpreadConnection;
@@ -16,7 +18,7 @@ class SpreadWorker : public QThread
     friend class SpreadConnection;
 
 public:
-    explicit SpreadWorker(QObject* parent = 0);
+    explicit SpreadWorker(WorkerGetters getters, QObject* parent = 0);
     ~SpreadWorker();
 
     virtual void run() override;
@@ -30,7 +32,7 @@ signals:
 
 private:
     volatile bool running;
-    int mailbox;
+    WorkerGetters getters;
     void multicast(QByteArray groups, std::function<void (QByteArray)> func);
 };
 

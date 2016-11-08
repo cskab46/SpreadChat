@@ -176,6 +176,7 @@ void ChatWindow::notifyJoin(QByteArray group, QByteArray user)
     ChatTabWidget* tab = getTab(group);
     if (tab) {
         tab->addNotification(user, "entrou no grupo", Qt::darkGreen);
+        tab->updateMembers(connection->getUsers(group));
     }
 }
 
@@ -184,6 +185,7 @@ void ChatWindow::notifyLeave(QByteArray group, QByteArray user)
     ChatTabWidget* tab = getTab(group);
     if (tab) {
         tab->addNotification(user, "saiu do grupo", Qt::darkRed);
+        tab->updateMembers(connection->getUsers(group));
     }
 }
 
