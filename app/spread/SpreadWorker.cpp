@@ -1,6 +1,7 @@
 #include "SpreadWorker.h"
 #include <QCoreApplication>
 #include <QMutexLocker>
+#include <cassert>
 #include <sp.h>
 
 SpreadWorker::SpreadWorker(QObject* parent)
@@ -40,12 +41,14 @@ void SpreadWorker::run()
                 message.resize(msgSize);
                 // Trata mensagem de entrada ou saída do grupo
                 if (Is_membership_mess(svcType)) {
+                    membership_info mbInfo;
                     // Algum membro entrou ou saiu de um grupo
                     if (Is_reg_memb_mess(svcType)) {
                         status = SP_receive (
                             mailbox, &svcType, sender.data(), maxGroups, &numGroups,
                             reinterpret_cast<char(*)[32]>(groups.data()), &msgType, &mismatch, msgSize, message.data()
                         );
+
                         QByteArray firstGroup = groups.mid(0, qMin(qstrlen(groups.data()), unsigned(MAX_GROUP_NAME)));
                         emit messageReceived(SpreadMessage(firstGroup, sender, message));
                     }
@@ -66,16 +69,9 @@ void SpreadWorker::run()
                         emit fatalError("Erro ocorrido no recebimento da mensagem, servidor fora do ar?");
                         break;
                     }
-                    // Separa os nomes dos grupos a cada 32 caracteres (MAX_GROUP_NAME)
-                    const char* iterator = groups.constData();
-                    while (*iterator) {
-                        // Calcula o tamanho da string (menor valor entre MAX_GROUP_NAME e distância até o primeiro \0)
-                        // E então copia a string para um array contendo um grupo de destino da mensagem
-                        size_t strSize = qMin(strlen(iterator), size_t(MAX_GROUP_NAME));
-                        QByteArray group = {iterator, int(strSize)};
+                    multicast(groups, [this, sender, message](QByteArray group) {
                         emit messageReceived(SpreadMessage(group, sender, message));
-                        iterator += MAX_GROUP_NAME;
-                    }
+                    });
                 }
                 else {
                     emit fatalError("Não foi possível tratar o tipo de mensagem: (int: 0x" + QString::number(svcType, 16) + ")");
@@ -92,4 +88,19 @@ void SpreadWorker::run()
 void SpreadWorker::finish()
 {
     running = false;
+}
+
+void SpreadWorker::multicast(QByteArray groups, std::function<void (QByteArray)> func)
+{
+    assert((groups.size() % 32) == 0);
+    // Separa os nomes dos grupos a cada 32 caracteres (MAX_GROUP_NAME)
+    const char* iterator = groups.constData();
+    while (*iterator) {
+        // Calcula o tamanho da string (menor valor entre MAX_GROUP_NAME e distância até o primeiro \0)
+        // E então copia a string para um array contendo um grupo de destino da mensagem
+        size_t strSize = qMin(strlen(iterator), size_t(MAX_GROUP_NAME));
+        QByteArray group = {iterator, int(strSize)};
+        func(group);
+        iterator += MAX_GROUP_NAME;
+    }
 }
