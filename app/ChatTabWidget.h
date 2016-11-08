@@ -2,9 +2,8 @@
 #define CHATTABWIDGET_H
 
 #include <QWidget>
+#include "SpreadConnection.h"
 #include "SpreadMessage.h"
-
-class SpreadGroup;
 
 namespace Ui {
 class ChatTabWidget;
@@ -17,11 +16,12 @@ class ChatTabWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ChatTabWidget(SpreadGroup* group, ChatWindow* parent);
+    explicit ChatTabWidget(SpreadConnPtr& connection, QByteArray groupName, ChatWindow* parent);
     ~ChatTabWidget();
 
-    const SpreadGroup* getGroup() const;
+    QByteArray getGroupName() const;
     void addMessage(SpreadMessage message);
+    void addNotification(QString text);
     void setFocus();
 
 private slots:
@@ -29,7 +29,8 @@ private slots:
 
 private:
     Ui::ChatTabWidget* ui;
-    SpreadGroup* group;
+    SpreadConnPtr& connection;
+    QByteArray groupName;
     ChatWindow* window;
 };
 

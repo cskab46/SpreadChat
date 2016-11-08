@@ -2,7 +2,6 @@
 #define SPREADCONNECTION_H
 
 #include "SpreadWorker.h"
-#include "SpreadGroup.h"
 #include <QString>
 #include <vector>
 #include <memory>
@@ -23,7 +22,7 @@ public:
         REJECT_AUTH = 9
     };
 
-    typedef std::vector<SpreadGroupPtr> SpreadGroupList;
+    typedef std::vector<QByteArray> SpreadGroupList;
 
 private:
     SpreadWorker worker;
@@ -49,9 +48,10 @@ public:
 
     // Group API
     const SpreadGroupList& getGroups() const;
-    SpreadGroup* joinGroup(QByteArray group);
+    bool joinGroup(QByteArray name);
     bool inGroup(QByteArray name) const;
-    void leaveGroup(const SpreadGroup* group);
+    void leaveGroup(const QByteArray name);
+    QByteArrayList getUsers(QByteArray group) const;
 
     // Message API
     bool sendMessage(QByteArray group, QByteArray message);

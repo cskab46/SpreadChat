@@ -9,7 +9,6 @@
 #include <QTextEdit>
 
 #include "ChatWindow.h"
-#include "SpreadGroup.h"
 
 class TextEditSubmitFilter : public QObject
 {
@@ -28,7 +27,7 @@ protected:
     {
         if (event->type() == QEvent::KeyPress) {
             QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-            bool enterPressed = keyEvent->key() == Qt::Key_Return;
+            bool enterPressed = keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter;
             bool shiftPressed = keyEvent->modifiers() == Qt::ShiftModifier;
             if (enterPressed && !shiftPressed) {
                 button->click();
@@ -39,10 +38,11 @@ protected:
     }
 };
 
-ChatTabWidget::ChatTabWidget(SpreadGroup* group, ChatWindow* parent)
+ChatTabWidget::ChatTabWidget(SpreadConnPtr& connection, QByteArray groupName, ChatWindow* parent)
     : QWidget(parent)
     , ui(new Ui::ChatTabWidget)
-    , group(group)
+    , connection(connection)
+    , groupName(groupName)
     , window(parent)
 {
     ui->setupUi(this);
@@ -57,9 +57,9 @@ ChatTabWidget::~ChatTabWidget()
     delete ui;
 }
 
-const SpreadGroup* ChatTabWidget::getGroup() const
+QByteArray ChatTabWidget::getGroupName() const
 {
-    return group;
+    return groupName;
 }
 
 void ChatTabWidget::addMessage(SpreadMessage message)
@@ -77,6 +77,15 @@ void ChatTabWidget::addMessage(SpreadMessage message)
     log->append("");
 }
 
+void ChatTabWidget::addNotification(QString text)
+{
+    QTextEdit* log = ui->outputLog;
+    log->setFontWeight(QFont::Bold);
+    log->setTextColor(Qt::darkGreen);
+    log->append(text);
+    log->append("");
+}
+
 void ChatTabWidget::setFocus()
 {
     ui->inputField->setFocus();
@@ -88,7 +97,7 @@ void ChatTabWidget::on_sendButton_clicked()
     if (!text.isEmpty()) {
         QTextCodec* codec = window->getEncoding();
         QByteArray message = codec->fromUnicode(text);
-        group->sendMessage(message);
+        connection->sendMessage(groupName, message);
         ui->inputField->clear();
     }
 }

@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QTextCodec>
 #include <QCompleter>
+#include <QDebug>
 #include "JoinDialog.h"
 #include "ChatTabWidget.h"
 #include "SpreadConnection.h"
@@ -102,12 +103,12 @@ void ChatWindow::on_actionJoinGroup_triggered()
 {
     JoinDialog dialog;
     while (dialog.exec()) {
-        std::string groupName = dialog.groupName().toStdString();
+        QByteArray groupName = dialog.groupName().toLatin1();
         if (!connection->inGroup(groupName.data())) {
             // Entra no grupo novo
-            SpreadGroup* group = connection->joinGroup(groupName.data());
-            if (group) {
-                addGroupTab(group);
+            bool joined = connection->joinGroup(groupName.data());
+            if (joined) {
+                addGroupTab(groupName);
                 break;
             }
             else {
@@ -119,7 +120,7 @@ void ChatWindow::on_actionJoinGroup_triggered()
             int index = 0;
             while (index < ui->tabWidget->count()) {
                 ChatTabWidget* widget = dynamic_cast<ChatTabWidget*>(ui->tabWidget->widget(index));
-                auto name = widget->getGroup()->getName();
+                QByteArray name = widget->getGroupName();
                 if (name == groupName.data()) {
                     break;
                 }
@@ -134,10 +135,10 @@ void ChatWindow::on_actionJoinGroup_triggered()
 void ChatWindow::on_tabWidget_tabCloseRequested(int index)
 {
     ChatTabWidget* widget = dynamic_cast<ChatTabWidget*>(ui->tabWidget->widget(index));
-    const SpreadGroup* group = widget->getGroup();
-    auto tab = tabs.find(group->getName());
-    tabs.erase(tab);
+    QByteArray group = widget->getGroupName();
     connection->leaveGroup(group);
+    auto tab = tabs.find(group);
+    tabs.erase(tab);
     ui->tabWidget->removeTab(index);
     if (ui->tabWidget->count() == 0) {
         createDefaultTab();
@@ -147,8 +148,13 @@ void ChatWindow::on_tabWidget_tabCloseRequested(int index)
 void ChatWindow::receiveMessage(SpreadMessage message)
 {
     auto tab = tabs.find(message.group);
+    qInfo() << "Tentando receber mensagem no grupo:" << message.group;
     if (tab != tabs.end()) {
         tab->second->addMessage(message);
+        qInfo() << "Sucesso!";
+    }
+    else {
+        qWarning() << "Grupo não existente!";
     }
 }
 
@@ -159,17 +165,17 @@ void ChatWindow::quitWithError(QString err)
     qApp->exit(1);
 }
 
-void ChatWindow::addGroupTab(SpreadGroup* group)
+void ChatWindow::addGroupTab(QByteArray groupName)
 {
     if (defaultTabVisible) {
         ui->tabWidget->removeTab(0);
         ui->tabWidget->setEnabled(true);
         defaultTabVisible = false;
     }
-    auto widget = new ChatTabWidget(group, this);
-    ui->tabWidget->addTab(widget, group->getName());
+    auto widget = new ChatTabWidget(connection, groupName, this);
+    ui->tabWidget->addTab(widget, groupName);
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count() - 1);
-    tabs.insert({group->getName(), widget});
+    tabs.insert({groupName, widget});
     widget->setFocus();
 }
 

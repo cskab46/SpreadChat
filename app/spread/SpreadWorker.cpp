@@ -33,18 +33,26 @@ void SpreadWorker::run()
                     mailbox, &svcType, sender.data(), 0, &numGroups,
                     nullptr, &msgType, &mismatch, 0, nullptr
                 );
+                // Define os tamanhos máximos a partir da mensagem anterior
                 int msgSize = -mismatch;
                 int maxGroups = -numGroups;
                 groups.resize(maxGroups * MAX_GROUP_NAME);
                 message.resize(msgSize);
                 // Trata mensagem de entrada ou saída do grupo
                 if (Is_membership_mess(svcType)) {
-                    // Outro membro entrou ou saiu de algum grupo
+                    // Algum membro entrou ou saiu de um grupo
                     if (Is_reg_memb_mess(svcType)) {
                         status = SP_receive (
                             mailbox, &svcType, sender.data(), maxGroups, &numGroups,
                             reinterpret_cast<char(*)[32]>(groups.data()), &msgType, &mismatch, msgSize, message.data()
                         );
+                        QByteArray firstGroup = groups.mid(0, qMin(qstrlen(groups.data()), unsigned(MAX_GROUP_NAME)));
+                        emit messageReceived(SpreadMessage(firstGroup, sender, message));
+                    }
+                    // Evento de transição
+                    else if (Is_transition_mess(svcType)) {
+                        QByteArray firstGroup = groups.mid(0, qMin(qstrlen(groups.data()), unsigned(MAX_GROUP_NAME)));
+                        emit messageReceived(SpreadMessage(firstGroup, sender, message));
                     }
                 }
                 // Trata mensagem de dados comum
@@ -58,7 +66,8 @@ void SpreadWorker::run()
                         emit fatalError("Erro ocorrido no recebimento da mensagem, servidor fora do ar?");
                         break;
                     }
-                    // Pára de ler o nome do grupo em MAX_GROUPSIZE (32) ou no primeiro byte nulo
+                    // Separa os nomes dos grupos a cada 32 caracteres (MAX_GROUP_NAME)
+
                     QByteArray firstGroup = groups.mid(0, qMin(qstrlen(groups.data()), unsigned(MAX_GROUP_NAME)));
                     emit messageReceived(SpreadMessage(firstGroup, sender, message));
                 }

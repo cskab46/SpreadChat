@@ -33,7 +33,7 @@ private slots:
 
 private:
     void createDefaultTab();
-    void addGroupTab(SpreadGroup* group);
+    void addGroupTab(QByteArray groupName);
 
     Ui::ChatWindow* ui;
     QComboBox* codecBox;

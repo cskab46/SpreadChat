@@ -83,32 +83,39 @@ const SpreadConnection::SpreadGroupList& SpreadConnection::getGroups() const
     return groups;
 }
 
-SpreadGroup* SpreadConnection::joinGroup(QByteArray group)
+bool SpreadConnection::joinGroup(QByteArray name)
 {
-    int status = SP_join(mailbox, group.data());
+    int status = SP_join(mailbox, name.data());
     if (status != 0) {
         lastError = status;
-        return nullptr;
+        return false;
     }
-    groups.push_back(std::make_unique<SpreadGroup>(this, group));
-    return groups.back().get();
+    groups.push_back(name);
+    return true;
 }
 
 bool SpreadConnection::inGroup(QByteArray name) const
 {
-    auto result = std::find_if(groups.begin(), groups.end(), [&](const SpreadGroupPtr& val) {
-        return val->getName() == name;
+    auto result = std::find_if(groups.begin(), groups.end(), [&](const QByteArray& group) {
+        return name == group;
     });
     return result != groups.end();
 }
 
-void SpreadConnection::leaveGroup(const SpreadGroup* group)
+void SpreadConnection::leaveGroup(QByteArray name)
 {
-    SP_leave(mailbox, group->getName().data());
-    auto iter = std::remove_if(groups.begin(), groups.end(), [&](const SpreadGroupPtr& val) {
-        return val->getName() == group->getName();
-    });
-    groups.erase(iter, groups.end());
+    if (inGroup(name)) {
+        SP_leave(mailbox, name.data());
+        auto iter = std::remove_if(groups.begin(), groups.end(), [&](const QByteArray& group) {
+            return name == group;
+        });
+        groups.erase(iter, groups.end());
+    }
+}
+
+QByteArrayList SpreadConnection::getUsers(QByteArray group) const
+{
+    return {};
 }
 
 bool SpreadConnection::sendMessage(QByteArray group, QByteArray message)
