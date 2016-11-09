@@ -109,7 +109,7 @@ void ChatTabWidget::setFocus()
 
 void ChatTabWidget::on_sendButton_clicked()
 {
-    const QString& text = ui->inputField->toPlainText();
+    const QString& text = ui->inputField->toPlainText().trimmed();
     if (!text.isEmpty()) {
         QTextCodec* codec = window->getEncoding();
         QByteArray message = codec->fromUnicode(text);
