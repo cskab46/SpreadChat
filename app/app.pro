@@ -6,9 +6,6 @@ QT += core gui widgets
 
 INCLUDEPATH += ../spread/include ./spread
 
-unix:CONFIG(debug):QMAKE_CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer
-unix:CONFIG(debug):QMAKE_LFLAGS += -fsanitize=address
-
 unix:LIBS += \
     ../spread/libspread/libspread.a \
     ../spread/libspread-util/libspread-util.a \
