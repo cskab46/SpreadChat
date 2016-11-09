@@ -21,6 +21,7 @@ SpreadConnection::SpreadConnection()
 SpreadConnection::SpreadConnection(QByteArray user, QByteArray host, int port)
     : worker(WorkerGetters {this}, nullptr)
     , mailbox(-1)
+    , connected(false)
 {
     connect(user, host, port);
 }

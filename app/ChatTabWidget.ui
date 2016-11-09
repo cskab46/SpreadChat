@@ -40,6 +40,9 @@
       <property name="alignment">
        <set>Qt::AlignCenter</set>
       </property>
+      <property name="flat">
+       <bool>true</bool>
+      </property>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <property name="spacing">
         <number>0</number>
@@ -71,6 +74,9 @@
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
+      </property>
+      <property name="flat">
+       <bool>true</bool>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <property name="spacing">
@@ -169,8 +175,6 @@
         </layout>
        </item>
       </layout>
-      <zorder>outputLog</zorder>
-      <zorder>verticalLayoutWidget</zorder>
      </widget>
     </widget>
    </item>

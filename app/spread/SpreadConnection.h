@@ -43,6 +43,7 @@ public:
 
     SpreadConnection();
     SpreadConnection(QByteArray user, QByteArray host, int port);
+    SpreadConnection(const SpreadConnection&) = delete;
     ~SpreadConnection();
 
     // General API
